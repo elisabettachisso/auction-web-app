@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrazione</title>
+  <script src="https://unpkg.com/vue@3"></script>
+  <link href="css/register.css" rel="stylesheet">
+</head>
+<body>
+  <div id="register-app">
+    <form @submit.prevent="register">
+      <h2>Registrazione</h2>
+      <input type="text" v-model="username" placeholder="Username" required />
+      <input type="password" v-model="password" placeholder="Password" required />
+      <input type="text" v-model="name" placeholder="Nome" required />
+      <input type="text" v-model="surname" placeholder="Cognome" required />
+      <button type="submit">Registrati</button>
+      <p v-if="message">{{ message }}</p>
+    </form>
+  </div>
+
+  <script type="module" src="js/register.js"></script>
+</body>
+</html>

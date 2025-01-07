@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  chisso-app:
+    container_name: chisso-app
+    build: .
+    command: npx nodemon app.js
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app:/usr/src/app
+    env_file:
+      - ./.env
+    depends_on:
+      - chisso-db
+
+  chisso-db:
+    container_name: chisso-db
+    image: mysql:8.0    
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./app/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: elisabetta
+      MYSQL_DATABASE: auction_platform
+
+volumes:
+  db_data:
