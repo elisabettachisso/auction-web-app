@@ -1,25 +1,8 @@
 // GET /api/whoami
 
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const router = express.Router();
 const db = require("../config/db.js");
-
-const verifyToken = (req, res, next) => {
-    const token = req.cookies["token"];
-    if(!token){
-        res.status(403).json({msg: "Autenticazione fallita"});
-        return;
-    }
-    try {
-        const decoded = jwt.verify(token, "my cats are better");
-        req.userId = decoded.id;
-        next();
-    } catch (error){
-        res.status(401).json({msg: "Unauthorized"});
-    }
-
-};
 
 router.get("/", async (req, res) => {
     const mysql = await db.connectToDatabase();

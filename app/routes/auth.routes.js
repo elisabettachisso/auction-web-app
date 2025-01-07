@@ -12,7 +12,7 @@ router.post("/signup", async (req, res) => {
         if (user.length > 0) {
             return res.status(409).json({ msg: "User already existing" });
         } else {
-            const [result] =await mysql.query('INSERT INTO users (username, password, name, surname) VALUES (?, ?, ?, ?)', [username, password, name, surname]);
+            const [result] = await mysql.query('INSERT INTO users (username, password, name, surname) VALUES (?, ?, ?, ?)', [username, password, name, surname]);
             res.status(201).json({
                 id: result.insertId,
                 username,
@@ -43,7 +43,7 @@ router.post("/signin", async (req, res) => {
             const user = users[0];
             if (user.password === password && user.username === username){
                 const data = { id: user.id };
-                const token = jwt.sign(data, process.env.DB_HOST, {
+                const token = jwt.sign(data, process.env.JWT_SECRET, {
                     expiresIn: 86400,
                 });
                 res.cookie("token", token, {httpOnly: true});
