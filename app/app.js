@@ -17,8 +17,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auctions", auctionsRoutes);
-app.use("/api/users", usersRoutes);
+app.use("/api", usersRoutes);
 app.use("/api/auth", authRoutes);
+app.use('/images', express.static("./pubic/images"));
+
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public/index.html"));

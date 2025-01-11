@@ -48,7 +48,7 @@ router.post("/signin", async (req, res) => {
                 });
                 res.cookie("token", token, {httpOnly: true});
                 res.status(201).json({ 
-                    msg: "Autenticazione avvenuta con successo",
+                    msg: "Login successful!",
                     redirectUrl: "/home.html",
                 });
             }

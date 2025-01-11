@@ -67,3 +67,32 @@ INSERT IGNORE INTO bids (amount, auction_id, user_id, is_winning_bid) VALUES
 (90.0, 4, 5, FALSE),
 (70.0, 5, 6, FALSE),
 (220.0, 6, 4, TRUE);
+
+CREATE OR REPLACE VIEW v_auction_user AS
+SELECT 
+    a.id AS auction_id,
+    a.title AS auction_title,
+    a.description AS auction_description,
+    a.start_price,
+    a.current_price,
+    a.end_date,
+    a.user_id AS auction_creator_id,
+    a.winner_id,
+    a.status,
+    a.icon AS auction_icon,
+    a.image AS auction_image,
+    a.created_at AS created_at,
+    a.updated_at AS updated_at,
+    a.is_deleted,
+    u.id AS user_id,
+    u.username AS user_username,
+    u.name AS user_name,
+    u.surname AS user_surname,
+    u.icon AS user_icon,
+    u.image AS user_image
+FROM 
+    auctions a
+JOIN 
+    users u
+ON 
+    a.user_id = u.id;

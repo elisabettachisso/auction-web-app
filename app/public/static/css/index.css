@@ -1,0 +1,129 @@
+:root {
+    --primary-color: #007b8c; /* Green/Aqua primary color */
+    --secondary-color: #ff478e; /* Pink secondary color */
+    --text-color: #333; /* Dark gray for text */
+    --background-color: #f9f9f9; /* Light gray background */
+    --white-color: #ffffff;
+}
+
+#index-body {
+    margin: 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.split-layout {
+    display: flex;
+    height: 100vh;
+}
+
+.left-panel {
+    flex: 1;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.left-panel h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.left-panel p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    max-width: 400px;
+}
+
+.right-panel {
+    flex: 1;
+    background-color: var(--white-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    padding: 12px 15px;
+    font-size: 1.1rem;
+    border-radius: 30px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action i {
+    margin-right: 10px;
+    font-size: 1.3rem;
+}
+
+.btn-action:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.login-register {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.btn-login, .btn-register {
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-login {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+.btn-login:hover {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+.btn-register {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+.btn-register:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
