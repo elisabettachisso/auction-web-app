@@ -1,4 +1,4 @@
-# Used Guitars and Broken Dreams™
+# Used Guitars and Broken Dreams
 
 An online auction application where users can buy and sell items like guitars, vinyl records, and other unique goods. The project includes authentication, auction management, and a modern interface.
 
