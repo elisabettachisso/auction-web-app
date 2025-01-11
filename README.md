@@ -69,15 +69,3 @@ Follow these steps to set up the project locally:
 - **Create Auctions**: Authenticated users can create and manage their own auctions.
 - **Place Bids**: Place bids on items to compete with other users.
 
-## Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests to improve the project.
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-```
-
-Let me know if you'd like to make further adjustments or add additional sections!
