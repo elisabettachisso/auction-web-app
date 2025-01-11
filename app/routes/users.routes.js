@@ -19,8 +19,18 @@ router.get("/users/", async (req, res) => {
 router.get("/users/:id", async (req, res) => {
     const mysql = await db.connectToDatabase();
     try {
-        const [user] = await mysql.query("SELECT id, username, name, surname, image FROM users WHERE id = ?", [parseInt(req.params.id)]);
-        res.json(user[0]);
+        const userId = parseInt(req.params.id);
+        const [user] = await mysql.query("SELECT id, username, name, surname, image FROM users WHERE id = ?", [userId]);
+        if (user.length === 0) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+        const [userCreatedAuctions] = await mysql.query("SELECT * FROM v_user_details WHERE user_id = ?", [userId]);
+        const [userWonAuctions] = await mysql.query("SELECT * FROM v_user_details WHERE is_winning_bid = 1 and created_auction_winner_id = ?", [userId]);
+        res.json({
+            user: user[0],
+            created_auctions: userCreatedAuctions,
+            won_auctions: userWonAuctions,
+        });
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ msg: "Server error while fetching users" });

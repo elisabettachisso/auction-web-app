@@ -8,6 +8,9 @@ const app = Vue.createApp({
       user: null,
       users: [],
       filteredUsers: [],
+      selectedUser: null,
+      selectedUserCreatedAuctions: [],
+      selectedUserWonAuctions: [],
       auctions: [],
       filteredAuctions: [],
       selectedAuction: null,
@@ -20,6 +23,11 @@ const app = Vue.createApp({
         start_price: null,
         end_date: '',
         image: null,
+      },
+      editedAuction: {
+        id: null,
+        title: '',
+        description: ''
       },
       imageFile: null,
     };
@@ -37,6 +45,9 @@ const app = Vue.createApp({
           this.user = userData; 
           this.isAuthenticated = true;
           console.log('User data:', this.user);
+          if (this.user && this.user.id) {
+            await this.fetchUserDetails(this.user.id);
+          }
         } else {
           console.error('Error fetching user data:', await response.json());
           this.user = null;
@@ -79,6 +90,27 @@ const app = Vue.createApp({
           console.error('Error during filterUsers:', error);
       }
     },
+    async fetchUserDetails(userId) {
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Dettagli dell'utente selezionato
+          this.selectedUser = data.user || null;
+          this.selectedUserCreatedAuctions = data.created_auctions || [];
+          this.selectedUserWonAuctions = data.won_auctions || [];
+          
+          console.log('Selected User:', this.selectedUser);
+          console.log('Selected User Created Auctions:', this.selectedUserCreatedAuctions);
+          console.log('Selected User Won Auctions:', this.selectedUserWonAuctions);
+        } else {
+          console.error('Error fetching user details:', await response.json());
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    },        
     async fetchAuctions() {
         try {
             const response = await fetch('/api/auctions');
@@ -269,6 +301,18 @@ const app = Vue.createApp({
     showUsers() {
       this.currentView = 'users'; 
     },
+    showUserAuctions() {
+      this.currentView = 'user-auctions';
+      this.fetchUserDetails(this.user.id); 
+    },
+    showUserBids() {
+      this.currentView = 'user-bids';
+      this.fetchUserDetails(this.user.id); 
+    },
+    showUserDetails(userId) {
+      this.currentView = 'selected-user-details';
+      this.fetchUserDetails(userId); 
+    },
     async showAuctionDetails(auctionId) {
       try {
         const response = await fetch(`/api/auctions/${auctionId}`);
@@ -284,7 +328,74 @@ const app = Vue.createApp({
       } catch (error) {
         console.error('Error fetching auction details:', error);
       }
-    },  
+    },
+    async showEditAuctionDetails(auctionId) {
+      const auction = this.auctions.find(a => a.auction_id === auctionId);
+      this.editedAuction = {
+        id: auctionId,
+        title: auction.title,
+        description: auction.description,
+      };
+      const modal = new bootstrap.Modal(document.getElementById('editAuctionModal'));
+      modal.show();
+    },
+  
+    async editAuction() {
+      try {
+        const response = await fetch(`/api/auctions/${this.editedAuction.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+          },
+          body: JSON.stringify({
+            title: this.editedAuction.title,
+            description: this.editedAuction.description,
+          }),
+        });
+        if (response.ok) {
+          const updatedAuction = await response.json();
+          const auctionIndex = this.auctions.findIndex(a => a.auction_id === updatedAuction.id);
+          this.auctions[auctionIndex] = {
+            ...this.auctions[auctionIndex],
+            title: updatedAuction.updatedFields.title,
+            description: updatedAuction.updatedFields.description,
+          };
+          alert('Auction updated successfully!');
+          const modal = bootstrap.Modal.getInstance(document.getElementById('editAuctionModal'));
+          modal.hide();
+          await this.fetchAuctions();
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.msg}`);
+        }
+      } catch (error) {
+        console.error('Error updating auction:', error);
+        alert('An unexpected error occurred.');
+      }
+    },
+  
+    async deleteAuction(auctionId) {
+      try {
+        const response = await fetch(`/api/auctions/${auctionId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${getToken()}`
+          }
+        });
+        if (response.ok) {
+          this.auctions = this.auctions.filter(auction => auction.auction_id !== auctionId);
+          alert('Auction deleted successfully!');
+          await this.fetchAuctions();
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.msg}`);
+        }
+      } catch (error) {
+        console.error('Error deleting auction:', error);
+        alert('An unexpected error occurred.');
+      }
+    },
   },
   mounted() {
     this.checkAuthentication();

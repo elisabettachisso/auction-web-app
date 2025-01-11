@@ -23,7 +23,7 @@
           <li class="nav-item">
             <a class="nav-link text-white" href="#" @click.prevent="showAuctions"> <i class="bi bi-disc-fill"></i> Explore Auctions</a>
           </li>
-          <li class="nav-item" v-if="isAuthenticated">
+          <li class="nav-item">
             <a class="nav-link text-white" href="#" @click.prevent="showUsers"> <i class="bi bi-people-fill"></i> Other Users</a>
           </li>
         </ul>
@@ -42,8 +42,8 @@
                 <i class="bi bi-person-circle"></i> {{ user ? `${user.name} ${user.surname}` : 'Loading...' }}
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
-              <a class="dropdown-item" href="/login.html">Your Auctions</a>
-              <a class="dropdown-item" href="/register.html">Your Bids</a>
+              <a class="dropdown-item" href="#" @click.prevent="showUserAuctions">Your Auctions</a>
+              <a class="dropdown-item" href="#" @click.prevent="showUserBids">Your Bids</a>
             <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#" @click="logout">Logout</a>
             </div> 
@@ -54,7 +54,7 @@
   </nav>
 
   <!-- Main content -->
-  <div class="container mt-4" id="auctions-div" v-if="currentView === 'auctions'">
+  <div v-if="currentView === 'auctions'" class="container mt-4" id="auctions-div">
      <!-- Barra di ricerca -->
     <div class="row mb-3 align-items-center">
       <div class="col-md-6 d-flex">
@@ -119,9 +119,16 @@
             
             <button  v-if="auction"
               :disabled="!auction"
-              class="ms-3"
               @click="showAuctionDetails(auction.auction_id)">
               Details
+            </button>
+            <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
+              @click="showEditAuctionDetails(auction.auction_id)">
+              Edit
+            </button>
+            <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
+                    @click="deleteAuction(auction.auction_id)">
+              Delete
             </button>
           </div>
           </div>
@@ -129,7 +136,8 @@
       </div>
     </div>
   </div>
-  <div class="container mt-4" id="users-div" v-if="currentView === 'users'">
+
+  <div v-if="currentView === 'users'" class="container mt-4" id="users-div">
     <!-- Barra di ricerca -->
    <div class="row mb-3 align-items-center">
      <div class="col-md-6 d-flex">
@@ -155,169 +163,195 @@
          <div class="card-body">
            <h5 class="card-title">{{ user.name }} {{ user.surname }}</h5>
            <p class="card-text">Username: {{ user.username }}</p>
-
+            View User Details
+          </a>
            <button 
-             :class="['btn', isAuthenticated ? 'btn-primary' : 'btn-secondary']"
-             :disabled="!isAuthenticated"
              class="mt-3"
-             @click="isAuthenticated && alert('Bid placed!')">
-             User's auctions
+             @click="showUserDetails(user.id)">
+             User's details
            </button>
          </div>
        </div>
      </div>
    </div>
- </div>
- <div class="container mt-4" id="auctions-div" v-if="currentView === 'userAuctions'">
-  <!-- Barra di ricerca -->
- <div class="row mb-3 align-items-center">
-   <div class="col-md-6 d-flex">
-     <input 
-       type="text" 
-       v-model="searchQuery" 
-       class="form-control" 
-       placeholder="Search for auctions..." 
-       style="max-width: 300px;"
-     />
-     <button 
-       class="btn btn-primary ms-2"
-       @click="filterAuctions">
-       <i class="bi bi-search"></i>
-     </button>
-   </div>
-   <div class="col-md-6 text-end">
-     <button 
-       class="btn btn-success"
-       @click="showCreateAuctionModal">
-       <i class="bi bi-plus-circle"></i> Create Auction
-     </button>
-   </div>
- </div>
-
- <div class="row" id="user-auction-list">
-   <div class="col-md-4 mb-4" v-for="auction in filteredUserAuctions" :key="auction.auction_id">
-     <div class="card shadow-sm">
-       <img :src="`images/${auction.auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
-       <div class="card-body">
-         <h5 class="card-title">{{ auction.auction_title }}</h5>
-         <p class="card-text">{{ auction.auction_description }}</p>
-         <p class="card-text">
-           <strong>End Date: </strong> {{ formatDate(auction.end_date) }}
-         </p>
-         <p class="card-text">
-           <strong>Status: </strong> 
-           <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-             {{ isAuctionClosed(auction.status) }}
-           </span>
-         </p>
-         <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>
-         
-
-         <div class="d-flex align-items-center mt-3">
-           <img 
-             :src="auction.user_image || 'images/default-user.jpg'" 
-             alt="User Icon" 
-             class="rounded-circle me-2" 
-             style="width: 40px; height: 40px;"
-           />
-           <p class="mb-0">{{ auction.user_name }} {{ auction.user_surname }}</p>
-         </div>
-
-         <button v-if="user.id !== auction.auction_creator_id"
-           :class="['btn', isAuthenticated ? 'btn-primary' : 'btn-secondary']"
-           :disabled="!isAuthenticated || auction.status === 'closed' || user.id === auction.winner_id"
-           class="mt-3"
-           @click="isAuthenticated && alert('Bid placed!')">
-           Bid on it! {{ user.id }}
-         </button>
-       </div>
-     </div>
-   </div>
- </div>
-</div>
-
-<div v-if="selectedAuction" class="container mt-4" id="auction-details-div" v-if="currentView === 'auction-details'">
-  <div class="row">
-      <div class="col-md-12">
-          <button class="btn btn-secondary mb-3" @click="showAuctions">Back to Auctions</button>
-          <h1>{{ selectedAuction.auction_title }}</h1>
-          <img :src="`images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid mb-3" style="width: 300px; height: 200px;">
-          <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
-          <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
-          <p><strong>Status: </strong> 
-              <span :class="selectedAuction.status === 'closed' ? 'text-danger' : 'text-success'">
-                  {{ isAuctionClosed(selectedAuction.status) }}
-              </span>
-          </p>
-          <p><strong>Current Price:</strong> {{ selectedAuction.current_price }}</p>
-          <div class="d-flex align-items-center mt-3 mb-3" v-if="selectedAuction.winner_name">
-            <img 
-              :src="selectedAuction.winner_image || 'images/default-user.jpg'" 
-              alt="User Icon" 
-              class="rounded-circle me-2" 
-              style="width: 40px; height: 40px;"
-            />
-            <p class="mb-0"><strong>Winning User:</strong> {{ selectedAuction.winner_name }} {{ selectedAuction.winner_surname }}</p>
-          </div>
-          <h3>Bids</h3>
-          <ul>
-              <li v-for="bid in auctionBids" :key="bid.bid_id">
-                  {{ bid.bidder_name }} bid {{ bid.bid_amount }} on {{ formatDate(bid.bid_created_at) }}
-              </li>
-          </ul>
-          <div v-if="isAuthenticated && selectedAuction.status !== 'closed'">
-              <input type="number" v-model="newBidAmount" placeholder="Your bid" class="form-control mb-2">
-              <button class="btn btn-primary" @click="placeBid">Place Bid</button>
-          </div>
-      </div>
   </div>
-</div>
-<div v-else>
-  <p>Loading auction details...</p>
-</div>
 
-
-<div class="modal fade" id="createAuctionModal" tabindex="-1" aria-labelledby="createAuctionModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="createAuctionModalLabel">Create New Auction</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="createAuction">
-          <div class="mb-3">
-            <label for="auctionTitle" class="form-label">Title</label>
-            <input type="text" v-model="newAuction.title" class="form-control" id="auctionTitle" required>
-          </div>
-          <div class="mb-3">
-            <label for="auctionDescription" class="form-label">Description</label>
-            <textarea v-model="newAuction.description" class="form-control" id="auctionDescription" rows="3" required></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="auctionStartPrice" class="form-label">Start Price</label>
-            <input type="number" v-model="newAuction.start_price" class="form-control" id="auctionStartPrice" required>
-          </div>
-          <div class="mb-3">
-            <label for="auctionEndDate" class="form-label">End Date</label>
-            <input type="datetime-local" v-model="newAuction.end_date" class="form-control" id="auctionEndDate" required>
-          </div>
-          <div class="mb-3">
-            <label for="auctionImage" class="form-label">Upload Image</label>
-            <input 
-              type="file" 
-              class="form-control" 
-              id="auctionImage" 
-              @change="handleFileUpload" 
-              name="image" 
-              accept="image/*">
-          </div>          
-          <button type="submit" class="btn btn-primary">Create</button>
-        </form>
+  <div  v-if="currentView === 'user-auctions'" class="container mt-4">
+  <h2>Your Auctions</h2>
+  <div class="row" v-if="selectedUserCreatedAuctions.length > 0">
+    <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
+      <div class="card shadow-sm">
+        <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+        <div class="card-body">
+          <h5 class="card-title">{{ auction.created_auction_title }}</h5>
+          <p class="card-text">{{ auction.created_auction_description }}</p>
+          <p><strong>Current Price:</strong> {{ auction.created_auction_current_price }}</p>
+          <p><strong>Status:</strong> {{ auction.created_auction_status }}</p>
+        </div>
       </div>
     </div>
   </div>
-</div>
+  <p v-else>No auctions found.</p>
+  </div>
+
+  <div v-if="currentView === 'user-bids'" class="container mt-4">
+    <h2>Your Won Auctions</h2>
+    <div class="row" v-if="selectedUserWonAuctions.length > 0">
+      <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
+        <div class="card shadow-sm">
+          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <div class="card-body">
+            <h5 class="card-title">{{ auction.created_auction_title }}</h5>
+            <p class="card-text">{{ auction.created_auction_description }}</p>
+            <p><strong>Winning Bid:</strong> {{ auction.bid_amount }}</p>
+            <p><strong>Status:</strong> {{ auction.created_auction_status }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p v-else>No won auctions found.</p>
+  </div>
+
+  <div v-if="currentView === 'auction-details'" class="container mt-4" id="auction-details-div">
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-secondary mb-3" @click="showAuctions">Back to Auctions</button>
+            <h1>{{ selectedAuction.auction_title }}</h1>
+            <img :src="`images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid mb-3" style="width: 300px; height: 200px;">
+            <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
+            <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
+            <p><strong>Status: </strong> 
+                <span :class="selectedAuction.status === 'closed' ? 'text-danger' : 'text-success'">
+                    {{ isAuctionClosed(selectedAuction.status) }}
+                </span>
+            </p>
+            <p><strong>Current Price:</strong> {{ selectedAuction.current_price }}</p>
+            <div class="d-flex align-items-center mt-3 mb-3" v-if="selectedAuction.winner_name">
+              <img 
+                :src="selectedAuction.winner_image || 'images/default-user.jpg'" 
+                alt="User Icon" 
+                class="rounded-circle me-2" 
+                style="width: 40px; height: 40px;"
+              />
+              <p class="mb-0"><strong>Winning User:</strong> {{ selectedAuction.winner_name }} {{ selectedAuction.winner_surname }}</p>
+            </div>
+            <h3>Bids</h3>
+            <ul>
+                <li v-for="bid in auctionBids" :key="bid.bid_id">
+                    {{ bid.bidder_name }} bid {{ bid.bid_amount }} on {{ formatDate(bid.bid_created_at) }}
+                </li>
+            </ul>
+            <div v-if="isAuthenticated && selectedAuction.status !== 'closed'">
+                <input type="number" v-model="newBidAmount" placeholder="Your bid" class="form-control mb-2">
+                <button class="btn btn-primary" @click="placeBid">Place Bid</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div v-if="currentView === 'selected-user-details'" class="container mt-4">
+    <h2>{{ selectedUser ? `${selectedUser.name} ${selectedUser.surname}` : 'User Details' }}</h2>
+    <p v-if="selectedUser">Username: {{ selectedUser.username }}</p>
+    <p v-if="selectedUser"><img :src="`images/${selectedUser.image || 'default-user.jpg'}`" alt="User Image" class="img-fluid"></p>
+    
+    <h3>Created Auctions</h3>
+    <div class="row" v-if="selectedUserCreatedAuctions.length > 0">
+      <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
+        <div class="card shadow-sm">
+          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <div class="card-body">
+            <h5 class="card-title">{{ auction.created_auction_title }}</h5>
+            <p class="card-text">{{ auction.created_auction_description }}</p>
+            <p><strong>Current Price:</strong> {{ auction.created_auction_current_price }}</p>
+            <p><strong>Status:</strong> {{ auction.created_auction_status }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p v-else>No created auctions found for this user.</p>
+    <h3>Won Auctions</h3>
+    <div class="row" v-if="selectedUserWonAuctions.length > 0">
+      <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
+        <div class="card shadow-sm">
+          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <div class="card-body">
+            <h5 class="card-title">{{ auction.created_auction_title }}</h5>
+            <p class="card-text">{{ auction.created_auction_description }}</p>
+            <p><strong>Winning Bid:</strong> {{ auction.bid_amount }}</p>
+            <p><strong>Status:</strong> {{ auction.created_auction_status }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p v-else>No auctions won by this user.</p>
+  </div>
+
+  <div class="modal fade" id="createAuctionModal" tabindex="-1" aria-labelledby="createAuctionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createAuctionModalLabel">Create New Auction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="createAuction">
+            <div class="mb-3">
+              <label for="auctionTitle" class="form-label">Title</label>
+              <input type="text" v-model="newAuction.title" class="form-control" id="auctionTitle" required>
+            </div>
+            <div class="mb-3">
+              <label for="auctionDescription" class="form-label">Description</label>
+              <textarea v-model="newAuction.description" class="form-control" id="auctionDescription" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="auctionStartPrice" class="form-label">Start Price</label>
+              <input type="number" v-model="newAuction.start_price" class="form-control" id="auctionStartPrice" required>
+            </div>
+            <div class="mb-3">
+              <label for="auctionEndDate" class="form-label">End Date</label>
+              <input type="datetime-local" v-model="newAuction.end_date" class="form-control" id="auctionEndDate" required>
+            </div>
+            <div class="mb-3">
+              <label for="auctionImage" class="form-label">Upload Image</label>
+              <input 
+                type="file" 
+                class="form-control" 
+                id="auctionImage" 
+                @change="handleFileUpload" 
+                name="image" 
+                accept="image/*">
+            </div>          
+            <button type="submit" class="btn btn-primary">Create</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Edit Auction Modal -->
+  <div class="modal fade" id="editAuctionModal" tabindex="-1" aria-labelledby="editAuctionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editAuctionModalLabel">Edit Auction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="editAuction">
+            <div class="mb-3">
+              <label for="editAuctionTitle" class="form-label">Title</label>
+              <input type="text" id="editAuctionTitle" v-model="editedAuction.title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="editAuctionDescription" class="form-label">Description</label>
+              <textarea id="editAuctionDescription" v-model="editedAuction.description" class="form-control" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
   <footer class="text-center py-3">
     <p>Used Guitars and Broken Dreams.</p>

@@ -28,7 +28,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server avviato su http://localhost:${PORT}`);
 });
-
-console.log("Users Routes:", usersRoutes);
-console.log("Auth Routes:", authRoutes);
-console.log("Auctions Routes:", auctionsRoutes);

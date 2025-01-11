@@ -132,13 +132,14 @@ LEFT JOIN
     bids b ON a.id = b.auction_id;
 
 
-CREATE OR REPLACE VIEW v_bid_user AS
+CREATE OR REPLACE VIEW v_bid_details AS
 SELECT 
     b.id AS bid_id,
+    b.auction_id,
     b.amount AS bid_amount,
     b.user_id AS bidder_id,
     b.is_winning_bid AS is_winning_bid,
-    b.created_at AS bid_created_at
+    b.created_at AS bid_created_at,
     u.id AS user_id,
     u.name AS seller_name,
     u.surname AS seller_surname,
@@ -150,3 +151,121 @@ JOIN
     users u
 ON 
     b.user_id = u.id;
+
+CREATE OR REPLACE VIEW v_user_details AS
+SELECT 
+    u.id AS user_id,
+    u.name AS seller_name,
+    u.surname AS seller_surname,
+    u.username AS seller_username,
+    u.image AS user_image,
+    b.id AS bid_id,
+    b.amount AS bid_amount,
+    b.is_winning_bid AS is_winning_bid,
+    b.created_at AS bid_created_at,
+    a.id as auction_id,
+    a.title as auction_title,
+    a.description as auction_description,
+    w.winner_id as winner,
+    a.user_id as creator
+FROM 
+    users u
+LEFT JOIN 
+    bids b on b.user_id = u.id
+LEFT JOIN
+    auctions a on a.user_id = u.id and a.id = b.auction_id
+LEFT JOIN 
+    auctions w on w.user_id = u.id and w.id = b.auction_id;
+
+
+CREATE OR REPLACE VIEW v_user_details AS
+SELECT
+    u.id AS user_id,
+    u.username,
+    u.name,
+    u.surname,
+    u.icon AS user_icon,
+    u.image AS user_image,
+    
+    -- Dettagli delle aste create dall'utente
+    a.id AS created_auction_id,
+    a.title AS created_auction_title,
+    a.description AS created_auction_description,
+    a.start_price AS created_auction_start_price,
+    a.current_price AS created_auction_current_price,
+    a.end_date AS created_auction_end_date,
+    a.status AS created_auction_status,
+    a.image AS created_auction_image,
+    a.winner_id as created_auction_winner_id,
+    w.name AS winner_name,
+    w.surname AS winner_surname,
+    w.username AS winner_username,
+    w.image AS winner_image,
+
+    -- Dettagli delle offerte fatte dall'utente
+    b.id AS bid_id,
+    b.amount AS bid_amount,
+    b.auction_id AS bid_auction_id,
+    CASE 
+        WHEN b.amount = (
+            SELECT MAX(b2.amount)
+            FROM bids b2
+            WHERE b2.auction_id = b.auction_id
+        )
+        THEN 1
+        ELSE 0
+    END AS is_winning_bid,
+    b.created_at AS bid_created_at
+FROM
+    users u
+LEFT JOIN auctions a ON u.id = a.user_id -- Aste create dall'utente
+LEFT JOIN users w ON w.id = a.winner_id -- dettagli utenti vincitori dell'asta
+LEFT JOIN bids b ON a.id = b.auction_id -- Offerte fatte per l'asta creata dall'utente;
+;
+
+
+CREATE OR REPLACE VIEW v_user_details AS
+SELECT
+    u.id AS user_id,
+    u.username,
+    u.name,
+    u.surname,
+    u.icon AS user_icon,
+    u.image AS user_image,
+    
+    -- Dettagli delle aste create dall'utente
+    a.id AS created_auction_id,
+    a.title AS created_auction_title,
+    a.description AS created_auction_description,
+    a.start_price AS created_auction_start_price,
+    a.current_price AS created_auction_current_price,
+    a.end_date AS created_auction_end_date,
+    a.status AS created_auction_status,
+    a.image AS created_auction_image,
+    a.winner_id as created_auction_winner_id,
+    w.name AS winner_name,
+    w.surname AS winner_surname,
+    w.username AS winner_username,
+    w.image AS winner_image,
+
+    -- Dettagli delle offerte fatte dall'utente
+    b.id AS bid_id,
+    b.amount AS bid_amount,
+    b.auction_id AS bid_auction_id,
+    CASE 
+        WHEN b.amount = (
+            SELECT MAX(b2.amount)
+            FROM bids b2
+            WHERE b2.auction_id = b.auction_id
+        )
+        THEN 1
+        ELSE 0
+    END AS is_winning_bid,
+    b.created_at AS bid_created_at
+FROM
+    users u
+LEFT JOIN auctions a ON u.id = a.user_id -- Aste create dall'utente
+LEFT JOIN users w ON w.id = a.winner_id -- dettagli utenti vincitori dell'asta
+LEFT JOIN bids b ON a.id = b.auction_id -- Offerte fatte per l'asta creata dall'utente;
+;
+
