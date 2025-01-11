@@ -35,12 +35,17 @@ const app = Vue.createApp({
         if (response.ok) {
           const userData = await response.json();
           this.user = userData; 
+          this.isAuthenticated = true;
           console.log('User data:', this.user);
         } else {
           console.error('Error fetching user data:', await response.json());
+          this.user = null;
+          this.isAuthenticated = false;
         }
       } catch (error) {
         console.error('Error during fetchUserData:', error);
+        this.user = null;
+        this.isAuthenticated = false;
       }
     },
     async fetchUsers() {
@@ -113,7 +118,7 @@ const app = Vue.createApp({
             console.log("data: ", data)
             this.auctionBids = data.bids;
             console.log(this.auctionBids)
-          console.log('Fetched bids:', bids);
+          console.log('Fetched bids:', data.bids);
           } else {
           console.error('Error fetching bids. Response status:', response.status);
           }
@@ -123,9 +128,19 @@ const app = Vue.createApp({
     },   
     async placeBid() {
       try {
-        if (!this.newBidAmount) {
-          alert('Please enter a valid bid amount.');
+        if (!this.newBidAmount || this.newBidAmount <= this.selectedAuction.current_price) {
+          alert('Your bid must be higher than the current price.');
           return;
+        }
+        if (this.isOwner || this.isAuctionExpired) {
+          alert('You cannot bid on this auction.');
+          return;
+        }
+        if (this.user.id === this.selectedAuction.winner_id) {
+          const proceed = window.confirm('You are already the user who is winning this auction, are you sure you want to proceed with placing an offer?');
+          if (!proceed) {
+              return; 
+          }
         }
         const response = await fetch(`/api/auctions/${this.selectedAuction.auction_id}/bids`, {
           method: 'POST',
@@ -135,6 +150,7 @@ const app = Vue.createApp({
         if (response.ok) {
           alert('Bid placed successfully!');
           this.fetchBidsForAuction(this.selectedAuction.auction_id);
+          this.showAuctionDetails(this.selectedAuction.auction_id);
         } else {
           alert('Failed to place bid.');
         }
@@ -258,7 +274,8 @@ const app = Vue.createApp({
         const response = await fetch(`/api/auctions/${auctionId}`);
         if (response.ok) {
           const data = await response.json();
-          this.selectedAuction = data.auction;
+          this.selectedAuction = data.auctions[0];
+          console.log(this.selectedAuction);
           this.currentView = 'auction-details';
           this.fetchBidsForAuction(auctionId);
         } else {
@@ -273,6 +290,8 @@ const app = Vue.createApp({
     this.checkAuthentication();
     if (this.isAuthenticated) {
       this.fetchUserData();
+    } else {
+        this.user = null;
     }
     this.fetchUsers();
     this.fetchAuctions();

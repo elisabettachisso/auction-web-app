@@ -1,9 +1,3 @@
-
-// GET
-// /api/auctions/:id/bids
-// POST
-// /api/auctions/:id/bids
-
 // GET
 // /api/bids/:id
 
@@ -11,6 +5,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db.js");
 const verifyToken = require('../middlewares/auth.js');
+const validateBid = require('../middlewares/auth.js');
 const { upload } = require('../middlewares/utils');
 
 router.get("/", async (req, res) => {
@@ -131,7 +126,7 @@ router.get("/:id", (req, res) => {
 router.get("/:id/bids", async (req, res) => {
     const mysql = await db.connectToDatabase();    
     try {
-        const [bids] = await mysql.query("SELECT * FROM bids WHERE auction_id = ?", [parseInt(req.params.id)]);
+        const [bids] = await mysql.query("SELECT * FROM v_bid_user WHERE auction_id = ?", [parseInt(req.params.id)]);
         res.json({bids});
     } catch (error) {
         console.error("Error fetching bids:", error);
@@ -144,9 +139,32 @@ router.post("/:id/bids", verifyToken, async (req, res) => {
     const { amount } = req.body;
     const user_id = req.userId;
     const auction_id = parseInt(req.params.id);
+    const currentDate = new Date();
+    const [auction] = await mysql.query("SELECT user_id, current_price, end_date FROM auctions WHERE id = ?", [auction_id]);
+
+    if (!auction.length) {
+        return res.status(404).json({ msg: "Auction not found" });
+    }
+    
+    const { user_id: owner_id, current_price, end_date } = auction[0];
+    
+    if (owner_id === user_id) {
+        return res.status(403).json({ msg: "You cannot bid on your own auction" });
+    }
+
+    if (amount <= current_price) {
+        return res.status(400).json({ msg: "Bid must be higher than the current price" });
+    }
+
+    if (new Date(end_date) < currentDate) {
+        return res.status(400).json({ msg: "Cannot bid on an expired auction" });
+    }
 
     try {
+        const query = `UPDATE auctions SET current_price = ?, updated_at = ?, winner_id = ? WHERE id = ?`;
+        await mysql.query(query, [amount, currentDate, user_id, auction_id]);
         const [result] = await mysql.query("INSERT INTO bids (amount, auction_id, user_id) VALUES (?, ?, ?)", [amount, auction_id, user_id]);
+        
         res.status(201).json({
             id: result.insertId,
             amount,

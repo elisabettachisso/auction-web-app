@@ -96,3 +96,57 @@ JOIN
     users u
 ON 
     a.user_id = u.id;
+
+CREATE OR REPLACE VIEW v_auction_details AS
+SELECT
+    a.id AS auction_id,
+    a.title AS auction_title,
+    a.description AS auction_description,
+    a.image AS auction_image,
+    a.start_price AS start_price,
+    a.current_price AS current_price,
+    a.end_date AS end_date,
+    a.status AS status,
+    a.winner_id AS winner_id,
+    w.name AS winner_name,
+    w.surname AS winner_surname,
+    w.username AS winner_username,
+    w.image AS winner_image,
+    a.user_id AS seller_id,
+    u.name AS seller_name,
+    u.surname AS seller_surname,
+    u.username AS seller_username,
+    u.image AS seller_image,
+    b.id AS bid_id,
+    b.amount AS bid_amount,
+    b.user_id AS bidder_id,
+    b.is_winning_bid AS is_winning_bid,
+    b.created_at AS bid_created_at
+FROM
+    auctions a
+LEFT JOIN
+    users u ON a.user_id = u.id
+LEFT JOIN
+    users w ON a.winner_id = w.id
+LEFT JOIN
+    bids b ON a.id = b.auction_id;
+
+
+CREATE OR REPLACE VIEW v_bid_user AS
+SELECT 
+    b.id AS bid_id,
+    b.amount AS bid_amount,
+    b.user_id AS bidder_id,
+    b.is_winning_bid AS is_winning_bid,
+    b.created_at AS bid_created_at
+    u.id AS user_id,
+    u.name AS seller_name,
+    u.surname AS seller_surname,
+    u.username AS seller_username,
+    u.image AS user_image    
+FROM 
+    bids b
+JOIN 
+    users u
+ON 
+    b.user_id = u.id;

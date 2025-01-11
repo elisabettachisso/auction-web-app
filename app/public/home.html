@@ -39,7 +39,7 @@
           </li>
           <li class="nav-item dropdown" v-if="isAuthenticated">
             <a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="bi bi-person-circle"></i> {{ user ? `${user.name} ${user.surname}` : 'Loading...' }}
+                <i class="bi bi-person-circle"></i> {{ user ? `${user.name} ${user.surname}` : 'Loading...' }}
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
               <a class="dropdown-item" href="/login.html">Your Auctions</a>
@@ -99,7 +99,7 @@
             <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>
             
 
-            <div class="d-flex align-items-center mt-3">
+            <div class="d-flex align-items-center mt-3" v-if="auction.user_image && auction.user_name">
               <img 
                 :src="auction.user_image || 'images/default-user.jpg'" 
                 alt="User Icon" 
@@ -108,8 +108,8 @@
               />
               <p class="mb-0">{{ auction.user_name }} {{ auction.user_surname }}</p>
             </div>
-            <div class="d-flex justify-content-between mt-3">
-            <button v-if="user.id !== auction.auction_creator_id"
+            <div class="d-flex justify-content-between mt-3" >
+            <button v-if="isAuthenticated && user.id !== auction.auction_creator_id"
               :class="['btn', isAuthenticated ? 'btn-primary' : 'btn-secondary']"
               :disabled="!isAuthenticated || auction.status === 'closed' || user.id === auction.winner_id"
               
@@ -236,32 +236,44 @@
  </div>
 </div>
 
-<div class="container mt-4" id="auction-details-div" v-if="currentView === 'auction-details'">
+<div v-if="selectedAuction" class="container mt-4" id="auction-details-div" v-if="currentView === 'auction-details'">
   <div class="row">
-    <div class="col-md-12">
-      <button class="btn btn-secondary mb-3" @click="showAuctions">Back to Auctions</button>
-      <h1>{{ selectedAuction.auction_title }}</h1>
-      <img :src="`images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid">
-      <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
-      <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
-      <p><strong>Status:</strong> 
-        <span :class="selectedAuction.status === 'closed' ? 'text-danger' : 'text-success'">
-          {{ isAuctionClosed(selectedAuction.status) }}
-        </span>
-      </p>
-      <p><strong>Current Price:</strong> {{ selectedAuction.current_price }}</p>
-      <h3>Bids</h3>
-      <ul>
-        <li v-for="bid in auctionBids" :key="bid.bid_id">
-          {{ bid.user_name }} bid {{ bid.amount }} on {{ formatDate(bid.timestamp) }}
-        </li>
-      </ul>
-      <div v-if="isAuthenticated && selectedAuction.status !== 'closed'">
-        <input type="number" v-model="newBidAmount" placeholder="Your bid" class="form-control mb-2">
-        <button class="btn btn-primary" @click="placeBid">Place Bid</button>
+      <div class="col-md-12">
+          <button class="btn btn-secondary mb-3" @click="showAuctions">Back to Auctions</button>
+          <h1>{{ selectedAuction.auction_title }}</h1>
+          <img :src="`images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid mb-3" style="width: 300px; height: 200px;">
+          <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
+          <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
+          <p><strong>Status: </strong> 
+              <span :class="selectedAuction.status === 'closed' ? 'text-danger' : 'text-success'">
+                  {{ isAuctionClosed(selectedAuction.status) }}
+              </span>
+          </p>
+          <p><strong>Current Price:</strong> {{ selectedAuction.current_price }}</p>
+          <div class="d-flex align-items-center mt-3 mb-3" v-if="selectedAuction.winner_name">
+            <img 
+              :src="selectedAuction.winner_image || 'images/default-user.jpg'" 
+              alt="User Icon" 
+              class="rounded-circle me-2" 
+              style="width: 40px; height: 40px;"
+            />
+            <p class="mb-0"><strong>Winning User:</strong> {{ selectedAuction.winner_name }} {{ selectedAuction.winner_surname }}</p>
+          </div>
+          <h3>Bids</h3>
+          <ul>
+              <li v-for="bid in auctionBids" :key="bid.bid_id">
+                  {{ bid.bidder_name }} bid {{ bid.bid_amount }} on {{ formatDate(bid.bid_created_at) }}
+              </li>
+          </ul>
+          <div v-if="isAuthenticated && selectedAuction.status !== 'closed'">
+              <input type="number" v-model="newBidAmount" placeholder="Your bid" class="form-control mb-2">
+              <button class="btn btn-primary" @click="placeBid">Place Bid</button>
+          </div>
       </div>
-    </div>
   </div>
+</div>
+<div v-else>
+  <p>Loading auction details...</p>
 </div>
 
 
