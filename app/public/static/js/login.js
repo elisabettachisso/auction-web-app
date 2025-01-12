@@ -32,7 +32,7 @@ const app = Vue.createApp({
                 });
                 const result = await response.json();
 
-                if (response.status === 201) {
+                if (response.ok) {
                     this.message = 'Login successful!';
                     this.success = true;
                     saveToken(result.token);

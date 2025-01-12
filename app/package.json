@@ -1,7 +1,18 @@
 {
+  "name": "auction-web-app",
+  "version": "1.0.0",
+  "description": "Auction web application",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx pm2-runtime app.js --name auction-web-app",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Elisabetta Chisso",
+  "license": "ISC",
   "dependencies": {
     "axios": "^1.7.9",
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.0.3",
@@ -10,19 +21,10 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.11.5",
     "path": "^0.12.7",
-    "vue": "^3.2.47",
-    "vue-router": "^4.5.0"
+    "pm2": "^5.4.3",
+    "vue": "^3.2.47"
   },
-  "name": "auction-web-app",
-  "version": "1.0.0",
-  "main": "app.js",
   "devDependencies": {
     "nodemon": "^3.1.9"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Elisabetta Chisso",
-  "license": "ISC",
-  "description": "Auction web application"
+  }
 }
