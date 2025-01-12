@@ -330,16 +330,25 @@ const app = Vue.createApp({
       }
     },
     async showEditAuctionDetails(auctionId) {
-      const auction = this.auctions.find(a => a.auction_id === auctionId);
-      this.editedAuction = {
-        id: auctionId,
-        title: auction.title,
-        description: auction.description,
-      };
-      const modal = new bootstrap.Modal(document.getElementById('editAuctionModal'));
-      modal.show();
+      try {
+        const auction = this.auctions.find(a => a.auction_id === auctionId);
+        if (!auction) {
+          alert("Auction not found.");
+          return;
+        }
+
+        this.editedAuction = {
+          id: auction.auction_id,
+          title: auction.auction_title,
+          description: auction.auction_description,
+        };
+        const modal = new bootstrap.Modal(document.getElementById('editAuctionModal'));
+        modal.show();
+      } catch (error) {
+        console.error("Error showing edit auction details:", error);
+        alert("Unable to load auction details.");
+      }
     },
-  
     async editAuction() {
       try {
         const response = await fetch(`/api/auctions/${this.editedAuction.id}`, {
@@ -373,8 +382,7 @@ const app = Vue.createApp({
         console.error('Error updating auction:', error);
         alert('An unexpected error occurred.');
       }
-    },
-  
+    },  
     async deleteAuction(auctionId) {
       try {
         const response = await fetch(`/api/auctions/${auctionId}`, {

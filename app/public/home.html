@@ -73,6 +73,7 @@
       </div>
       <div class="col-md-6 text-end">
         <button 
+          v-if="isAuthenticated"
           class="btn btn-success"
           @click="showCreateAuctionModal">
           <i class="bi bi-plus-circle"></i> Create Auction
@@ -83,7 +84,7 @@
     <div class="row" id="auction-list">
       <div class="col-md-4 mb-4" v-for="auction in filteredAuctions" :key="auction.auction_id">
         <div class="card shadow-sm">
-          <img :src="`images/${auction.auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <img :src="`static/images/${auction.auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
           <div class="card-body">
             <h5 class="card-title">{{ auction.auction_title }}</h5>
             <p class="card-text">{{ auction.auction_description }}</p>
@@ -101,7 +102,7 @@
 
             <div class="d-flex align-items-center mt-3" v-if="auction.user_image && auction.user_name">
               <img 
-                :src="auction.user_image || 'images/default-user.jpg'" 
+                :src="`static/images/${auction.user_image || 'default-user.jpg'}`" 
                 alt="User Icon" 
                 class="rounded-circle me-2" 
                 style="width: 40px; height: 40px;"
@@ -124,11 +125,11 @@
             </button>
             <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
               @click="showEditAuctionDetails(auction.auction_id)">
-              Edit
+              <i class="bi bi-pencil-square"></i>
             </button>
             <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
                     @click="deleteAuction(auction.auction_id)">
-              Delete
+                <i class="bi bi-trash-fill"></i>
             </button>
           </div>
           </div>
@@ -159,7 +160,7 @@
    <div class="row" id="users-list">
      <div class="col-md-4 mb-4" v-for="user in filteredUsers" :key="user.id">
        <div class="card shadow-sm">
-         <img :src="`${user.image || 'images/default-user.jpg'}`" class="card-img-top" alt="User Image">
+         <img :src="`static/images/${user.image || 'default-user.jpg'}`" class="card-img-top" alt="User Image">
          <div class="card-body">
            <h5 class="card-title">{{ user.name }} {{ user.surname }}</h5>
            <p class="card-text">Username: {{ user.username }}</p>
@@ -181,7 +182,7 @@
   <div class="row" v-if="selectedUserCreatedAuctions.length > 0">
     <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
       <div class="card shadow-sm">
-        <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+        <img :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
         <div class="card-body">
           <h5 class="card-title">{{ auction.created_auction_title }}</h5>
           <p class="card-text">{{ auction.created_auction_description }}</p>
@@ -199,7 +200,7 @@
     <div class="row" v-if="selectedUserWonAuctions.length > 0">
       <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
         <div class="card shadow-sm">
-          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <img :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
           <div class="card-body">
             <h5 class="card-title">{{ auction.created_auction_title }}</h5>
             <p class="card-text">{{ auction.created_auction_description }}</p>
@@ -217,7 +218,7 @@
         <div class="col-md-12">
             <button class="btn btn-secondary mb-3" @click="showAuctions">Back to Auctions</button>
             <h1>{{ selectedAuction.auction_title }}</h1>
-            <img :src="`images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid mb-3" style="width: 300px; height: 200px;">
+            <img :src="`static/images/${selectedAuction.auction_image || 'placeholder.png'}`" alt="Auction Image" class="img-fluid mb-3" style="width: 300px; height: 200px;">
             <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
             <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
             <p><strong>Status: </strong> 
@@ -228,7 +229,7 @@
             <p><strong>Current Price:</strong> {{ selectedAuction.current_price }}</p>
             <div class="d-flex align-items-center mt-3 mb-3" v-if="selectedAuction.winner_name">
               <img 
-                :src="selectedAuction.winner_image || 'images/default-user.jpg'" 
+                :src="`static/images/${selectedAuction.winner_image || 'default-user.jpg'}`" 
                 alt="User Icon" 
                 class="rounded-circle me-2" 
                 style="width: 40px; height: 40px;"
@@ -252,13 +253,13 @@
   <div v-if="currentView === 'selected-user-details'" class="container mt-4">
     <h2>{{ selectedUser ? `${selectedUser.name} ${selectedUser.surname}` : 'User Details' }}</h2>
     <p v-if="selectedUser">Username: {{ selectedUser.username }}</p>
-    <p v-if="selectedUser"><img :src="`images/${selectedUser.image || 'default-user.jpg'}`" alt="User Image" class="img-fluid"></p>
+    <p v-if="selectedUser"><img :src="`static/images/${selectedUser.image || 'default-user.jpg'}`" alt="User Image" class="img-fluid"></p>
     
     <h3>Created Auctions</h3>
     <div class="row" v-if="selectedUserCreatedAuctions.length > 0">
       <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
         <div class="card shadow-sm">
-          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <img :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
           <div class="card-body">
             <h5 class="card-title">{{ auction.created_auction_title }}</h5>
             <p class="card-text">{{ auction.created_auction_description }}</p>
@@ -273,7 +274,7 @@
     <div class="row" v-if="selectedUserWonAuctions.length > 0">
       <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
         <div class="card shadow-sm">
-          <img :src="`images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
+          <img :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
           <div class="card-body">
             <h5 class="card-title">{{ auction.created_auction_title }}</h5>
             <p class="card-text">{{ auction.created_auction_description }}</p>

@@ -6,6 +6,7 @@ const app = express();
 const auctionsRoutes = require("./routes/auctions.routes");
 const authRoutes = require("./routes/auth.routes");
 const usersRoutes = require("./routes/users.routes");
+const bidRoutes = require("./routes/bids.routes");
 
 const PORT = process.env.PORT || 3000;
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/api/auctions", auctionsRoutes);
 app.use("/api", usersRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/bids", bidRoutes);
 app.use('/images', express.static("./pubic/images"));
 
 

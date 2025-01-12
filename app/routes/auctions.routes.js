@@ -1,23 +1,15 @@
-// GET
-// /api/bids/:id
-
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db.js");
 const verifyToken = require('../middlewares/auth.js');
-const validateBid = require('../middlewares/auth.js');
-const { upload } = require('../middlewares/utils');
+const { upload, updateAuctionStatuses } = require('../middlewares/utils');
 
-router.get("/", async (req, res) => {
+router.get("/", updateAuctionStatuses, async (req, res) => {
     const mysql = await db.connectToDatabase();
     const query = req.query.q ? `%${req.query.q}%` : '%';
     console.log('Search query:', query);
-    const currentDate = new Date();
-    console.log(currentDate)
     try {
-        await mysql.query("UPDATE auctions SET status = 'closed' WHERE end_date < ? AND status != 'closed'", [currentDate]);
-        await mysql.query("UPDATE auctions SET status = 'open' WHERE end_date > ? AND status != 'open'", [currentDate]);
-        const [auctions] = await mysql.query("SELECT * FROM v_auction_user WHERE is_deleted = 0 AND auction_title LIKE ?", [query]);
+        const [auctions] = await mysql.query("SELECT * FROM v_auction_user WHERE is_deleted = 0 AND auction_title LIKE ? order by end_date", [query]);
         res.json({auctions});
     } catch (error) {
         console.error("Error fetching auctions:", error);
@@ -25,7 +17,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.post("/", verifyToken, upload.single('image'), async (req, res) => {
+router.post("/", verifyToken, upload.single('image'), updateAuctionStatuses, async (req, res) => {
     const mysql = await db.connectToDatabase();
     const { title, description, start_price, end_date, icon } = req.body;
     const user_id = req.userId;
@@ -117,10 +109,6 @@ router.delete("/:id", verifyToken, async (req, res) => {
         console.log(error);
         res.status(500).json({ msg: "Internal Error" });
     }
-});
-
-router.get("/:id", (req, res) => {
-    res.send("Auction routes working!");
 });
 
 router.get("/:id/bids", async (req, res) => {

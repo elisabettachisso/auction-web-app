@@ -45,12 +45,12 @@ INSERT IGNORE INTO users (username, password, name, surname, image) VALUES
 ('icanifan', '$2b$10$VOdtzJZz8JfHO.S63./tWuDtrbXRr68ppcdxGvMXCvNdNl3ait6Uu', 'Niccolo', 'Contessa', 'icani.jpg');
 
 INSERT IGNORE INTO auctions (title, description, start_price, current_price, end_date, user_id, status, image) VALUES
-('Calcutta''s Sweaty Tee', 'The legendary T-shirt worn by Calcutta during his marathon songwriting session. Smells like indie history.', 30.0, 50.0, '2024-12-15', 1, 'open','calcutta-tee.jpg'),
-('Gazzelle''s Concert Hoodie', 'A hoodie soaked in nostalgia from Gazzelle’s sold-out gigs. Comes with emotional baggage.', 40.0, 70.0, '2024-01-16', 2, 'open', 'gazzelle-hoodie.jpg'),
-('Cani''s Distorted Axe', 'The guitar that screamed its soul out on Cani’s greatest tour. Slightly battered, very rock n'' roll.', 300.0, 450.0, '2025-01-25', 3, 'open', 'cani-guitar.jpg'),
+('Calcutta''s Sweaty Tee', 'The legendary T-shirt worn by Calcutta during his marathon songwriting session. Smells like indie history.', 30.0, 50.0, '2024-12-15', 1, 'closed','calcutta-tee.jpg'),
+('Gazzelle''s Concert Hoodie', 'A hoodie soaked in nostalgia from Gazzelle''s sold-out gigs. Comes with emotional baggage.', 40.0, 70.0, '2024-01-16', 2, 'open', 'gazzelle-hoodie.jpg'),
+('Cani''s Distorted Axe', 'The guitar that screamed its soul out on Cani''s greatest tour. Slightly battered, very indie rock.', 300.0, 450.0, '2025-01-25', 3, 'open', 'cani-guitar.jpg'),
 ('Pop X''s Head Torch', 'Illuminate your path to indie stardom with the iconic head torch worn by Pop X during their most chaotic concert. Perfect for late-night gigs, impromptu karaoke sessions, or just finding your way to the fridge at 3 AM. Still carries traces of glitter, sweat, and unfiltered genius. Warning: May inspire spontaneous interpretive dance.', 100.0, 125.0, '2025-02-10', 1, 'open', 'popx-torch.jpg'),
 ('Vintage Vinyl of Vasco Brondi', 'A scratched but lovable record from Vasco Brondi, still good for late-night cries.', 20.0, 40.0, '2024-02-20', 2, 'open', 'vascobrondi-vinyl.jpg'),
-('Indie Rock Mystery Box', 'A surprise collection of random memorabilia from your favorite indie rock artists. Who knows what you’ll get?', 50.0, 100.0, '2024-03-28', 3, 'open', 'mystery-box.jpg');
+('Indie Rock Mystery Box', 'A surprise collection of random memorabilia from your favorite indie rock artists. Who knows what you''ll get?', 50.0, 100.0, '2024-03-28', 3, 'open', 'mystery-box.jpg');
 
 INSERT IGNORE INTO bids (amount, auction_id, user_id, is_winning_bid) VALUES
 (40.0, 1, 2, FALSE),
@@ -69,7 +69,6 @@ INSERT IGNORE INTO bids (amount, auction_id, user_id, is_winning_bid) VALUES
 (115.0, 4, 2, FALSE),
 (120.0, 4, 3, FALSE),
 (125.0, 4, 2, TRUE);
-
 
 CREATE OR REPLACE VIEW v_auction_user AS
 SELECT 
@@ -147,49 +146,12 @@ LEFT JOIN
 LEFT JOIN
     bids b ON a.id = b.auction_id;
 
-
-CREATE OR REPLACE VIEW v_bid_details AS
-SELECT 
-    b.id AS bid_id,
-    b.auction_id,
-    b.amount AS bid_amount,
-    b.user_id AS bidder_id,
-    b.is_winning_bid AS is_winning_bid,
-    b.created_at AS bid_created_at,
-    u.id AS user_id,
-    u.name AS seller_name,
-    u.surname AS seller_surname,
-    u.username AS seller_username,
-    u.image AS user_image,
-    CASE 
-        WHEN b.amount = (
-            SELECT MAX(b2.amount)
-            FROM bids b2
-            WHERE b2.auction_id = b.auction_id
-        ) AND a.status = 'closed'
-        THEN 'bi bi-trophy-fill'
-        WHEN b.amount = (
-            SELECT MAX(b2.amount)
-            FROM bids b2
-            WHERE b2.auction_id = b.auction_id
-        )
-        THEN 'bi bi-star-fill'
-        ELSE ''
-    END AS bid_icon    
-FROM 
-    bids b
-JOIN 
-    users u
-ON 
-    b.user_id = u.id;
-
 CREATE OR REPLACE VIEW v_user_details AS
 SELECT
     u.id AS user_id,
     u.username,
     u.name,
     u.surname,
-    u.icon AS user_icon,
     u.image AS user_image,
     a.id AS created_auction_id,
     a.title AS created_auction_title,
@@ -238,3 +200,21 @@ LEFT JOIN auctions a ON u.id = a.user_id
 LEFT JOIN users w ON w.id = a.winner_id 
 LEFT JOIN bids b ON a.id = b.auction_id;
 
+CREATE OR REPLACE VIEW v_bid_user AS
+SELECT 
+    b.id AS bid_id,
+    b.auction_id,
+    b.amount AS bid_amount,
+    b.is_winning_bid AS is_winning_bid,
+    b.created_at AS bid_created_at,
+    u.id AS user_id,
+    u.name AS bidder_name,
+    u.surname AS bidder_surname,
+    u.username AS bidder_username,
+    u.image AS user_image  
+FROM 
+    bids b
+JOIN 
+    users u
+ON 
+    b.user_id = u.id;
