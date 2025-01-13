@@ -97,9 +97,7 @@
                   {{ isAuctionClosed(auction.status) }}
                 </span>
               </p>
-              <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>
-              <p class="card-text"><strong>Belongs to: </strong></p>
-
+              <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>              
               <div class="d-flex align-items-center mt-3" v-if="auction.user_image && auction.user_name">
                 <img 
                   :src="`static/images/${auction.user_image || 'default-user.jpg'}`" 
@@ -107,7 +105,7 @@
                   class="rounded-circle me-2" 
                   style="width: 40px; height: 40px;"
                 />
-                <p class="mb-0">{{ auction.user_name }} {{ auction.user_surname }}</p>
+                <p class="mb-0"><strong>Owner: </strong>{{ auction.user_name }} {{ auction.user_surname }}</p>
               </div>
               <div class="d-flex justify-content-between mt-3" >
 
@@ -178,10 +176,10 @@
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ auction.created_auction_title }}</h5>
               <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
-              <p><strong>Current Price:</strong> €{{ auction.created_auction_current_price }}</p>
+              <p><strong>Current Price:</strong> € {{ auction.created_auction_current_price }}</p>
               <p><strong>Status: </strong> 
                 <span :class="auction.created_auction_status === 'closed' ? 'text-danger' : 'text-success'">
-                  {{ auction.created_auction_status }}
+                  {{ isAuctionClosed(auction.created_auction_status) }}
                 </span>
               </p>
               <div class="d-flex align-items-center mt-auto" v-if="auction.winner_name">
@@ -191,8 +189,8 @@
                   class="rounded-circle me-2" 
                   style="width: 40px; height: 40px;"
                 />
-                <p v-if="auction.created_auction_status === 'closed'" class="mb-0 text-muted">{{ auction.winner_name }} has winning this auction!</p>
-                <p v-if="auction.created_auction_status === 'open'"class="mb-0 text-muted">{{ auction.winner_name }} is winning this auction!</p> 
+                <p v-if="auction.created_auction_status === 'closed'" class="mb-0 text-muted">{{ auction.winner_name }} has won this auction!</p>
+                <p class="mb-0 text-muted" v-if="auction.created_auction_status === 'open'">{{ auction.winner_name }} is winning this auction!</p> 
               </div>
             </div>
             <div class="card-footer d-flex justify-content-between">
@@ -229,7 +227,7 @@
               <h5 class="card-title">{{ auction.created_auction_title }}</h5>
               <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
               <p><strong>Winning Bid:</strong> €{{ auction.bid_amount }}</p>
-              <p><strong>Status: </strong> {{ auction.created_auction_status }}
+              <p><strong>Status: </strong> {{ isAuctionClosed(auction.created_auction_status) }}
               </p>
             </div>
           </div>
@@ -264,6 +262,17 @@
               </span>
             </p>
             <p><strong>Current Price:</strong> ${{ selectedAuction.current_price }}</p>
+            <div class="d-flex align-items-center mt-4" v-if="selectedAuction.seller_name">
+              <img 
+                :src="`static/images/${selectedAuction.seller_image || 'default-user.jpg'}`" 
+                alt="User Icon" 
+                class="rounded-circle me-3" 
+                style="width: 50px; height: 50px;"
+              />
+              <p class="mb-0">
+                <strong  v-if="selectedAuction.status === 'open'">Owner: </strong>
+                 {{ selectedAuction.seller_name }} {{ selectedAuction.wseller_surname }}</p>
+            </div>
             <div class="d-flex align-items-center mt-4" v-if="selectedAuction.winner_name">
               <img 
                 :src="`static/images/${selectedAuction.winner_image || 'default-user.jpg'}`" 
@@ -272,8 +281,8 @@
                 style="width: 50px; height: 50px;"
               />
               <p class="mb-0">
-                <strong  v-if="selectedAuction.status === 'closed'">Winner:</strong>
-                <strong  v-if="selectedAuction.status === 'open'">Winning User:</strong>
+                <strong  v-if="selectedAuction.status === 'closed'">Winner: </strong>
+                <strong  v-if="selectedAuction.status === 'open'">Winning User: </strong>
                  {{ selectedAuction.winner_name }} {{ selectedAuction.winner_surname }}</p>
             </div>
           </div>
@@ -336,9 +345,10 @@
                 <h5 class="card-title">{{ auction.created_auction_title }}</h5>
                 <p class="card-text text-truncate">{{ auction.created_auction_description }}</p>
                 <p class="mb-1"><strong>Current Price:</strong> {{ auction.created_auction_current_price }}</p>
+                
                 <p><strong>Status:</strong> 
                   <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-                    {{ auction.created_auction_status }}
+                    {{ isAuctionClosed(auction.created_auction_status) }} 
                   </span>
                 </p>
                 <div v-if="auction.winner_name" class="mt-auto">
@@ -375,7 +385,7 @@
                 <p class="mb-1"><strong>Winning Bid:</strong> {{ auction.bid_amount }}</p>
                 <p><strong>Status:</strong> 
                   <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-                    {{ auction.created_auction_status }}
+                    {{ isAuctionClosed(auction.created_auction_status) }}
                   </span>
                 </p>
               </div>
