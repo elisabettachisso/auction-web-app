@@ -44,13 +44,13 @@ INSERT IGNORE INTO users (username, password, name, surname, image) VALUES
 ('gazellefan', '$2b$10$VOdtzJZz8JfHO.S63./tWuDtrbXRr68ppcdxGvMXCvNdNl3ait6Uu', 'Flavio', 'Bruno', 'gazzelle.jpg'),
 ('icanifan', '$2b$10$VOdtzJZz8JfHO.S63./tWuDtrbXRr68ppcdxGvMXCvNdNl3ait6Uu', 'Niccolo', 'Contessa', 'icani.jpg');
 
-INSERT IGNORE INTO auctions (title, description, start_price, current_price, end_date, user_id, status, image) VALUES
-('Calcutta''s Sweaty Tee', 'The legendary T-shirt worn by Calcutta during his marathon songwriting session. Smells like indie history.', 30.0, 50.0, '2024-12-15', 1, 'closed','calcutta-tee.jpg'),
-('Gazzelle''s Concert Hoodie', 'A hoodie soaked in nostalgia from Gazzelle''s sold-out gigs. Comes with emotional baggage.', 40.0, 70.0, '2024-01-16', 2, 'open', 'gazzelle-hoodie.jpg'),
-('Cani''s Distorted Axe', 'The guitar that screamed its soul out on Cani''s greatest tour. Slightly battered, very indie rock.', 300.0, 450.0, '2025-01-25', 3, 'open', 'cani-guitar.jpg'),
-('Pop X''s Head Torch', 'Illuminate your path to indie stardom with the iconic head torch worn by Pop X during their most chaotic concert. Perfect for late-night gigs, impromptu karaoke sessions, or just finding your way to the fridge at 3 AM. Still carries traces of glitter, sweat, and unfiltered genius. Warning: May inspire spontaneous interpretive dance.', 100.0, 125.0, '2025-02-10', 1, 'open', 'popx-torch.jpg'),
-('Vintage Vinyl of Vasco Brondi', 'A scratched but lovable record from Vasco Brondi, still good for late-night cries.', 20.0, 40.0, '2024-02-20', 2, 'open', 'vascobrondi-vinyl.jpg'),
-('Indie Rock Mystery Box', 'A surprise collection of random memorabilia from your favorite indie rock artists. Who knows what you''ll get?', 50.0, 100.0, '2024-03-28', 3, 'open', 'mystery-box.jpg');
+INSERT IGNORE INTO auctions (title, description, start_price, current_price, end_date, user_id, winner_id, status, image) VALUES
+('Calcutta''s Sweaty Tee', 'The legendary T-shirt worn by Calcutta during his marathon songwriting session. Smells like indie history.', 30.0, 50.0, '2024-12-15', 1, 3, 'closed','calcutta-tee.jpg'),
+('Gazzelle''s Concert Hoodie', 'A hoodie soaked in nostalgia from Gazzelle''s sold-out gigs. Comes with emotional baggage.', 40.0, 70.0, '2024-01-16', 2, 3, 'open', 'gazzelle-hoodie.jpg'),
+('Cani''s Distorted Axe', 'The guitar that screamed its soul out on Cani''s greatest tour. Slightly battered, very indie rock.', 300.0, 450.0, '2025-01-25', 3, 2, 'open', 'cani-guitar.jpg'),
+('Pop X''s Head Torch', 'Illuminate your path to indie stardom with the iconic head torch worn by Pop X during their most chaotic concert. Perfect for late-night gigs, impromptu karaoke sessions, or just finding your way to the fridge at 3 AM. Still carries traces of glitter, sweat, and unfiltered genius. Warning: May inspire spontaneous interpretive dance.', 100.0, 125.0, '2025-02-10', 1, 2, 'open', 'popx-torch.jpg'),
+('Vintage Vinyl of Vasco Brondi', 'A scratched but lovable record from Vasco Brondi, still good for late-night cries.', 20.0, 40.0, '2024-02-20', 2, 1, 'open', 'vascobrondi-vinyl.jpg'),
+('Indie Rock Mystery Box', 'A surprise collection of random memorabilia from your favorite indie rock artists. Who knows what you''ll get?', 50.0, 100.0, '2024-03-28', 3, 1, 'open', 'mystery-box.jpg');
 
 INSERT IGNORE INTO bids (amount, auction_id, user_id, is_winning_bid) VALUES
 (40.0, 1, 2, FALSE),
@@ -68,7 +68,11 @@ INSERT IGNORE INTO bids (amount, auction_id, user_id, is_winning_bid) VALUES
 (110.0, 4, 3, FALSE),
 (115.0, 4, 2, FALSE),
 (120.0, 4, 3, FALSE),
-(125.0, 4, 2, TRUE);
+(125.0, 4, 2, TRUE),
+(30.0, 5, 3, FALSE),
+(40.0, 5, 1, TRUE),
+(70.0, 6, 2, FALSE),
+(100.0, 6, 1, TRUE);
 
 CREATE OR REPLACE VIEW v_auction_user AS
 SELECT 
@@ -107,6 +111,7 @@ SELECT
     a.current_price AS current_price,
     a.end_date AS end_date,
     a.status AS status,
+    a.is_deleted,
     a.winner_id AS winner_id,
     w.name AS winner_name,
     w.surname AS winner_surname,
@@ -161,6 +166,7 @@ SELECT
     a.end_date AS created_auction_end_date,
     a.status AS created_auction_status,
     a.image AS created_auction_image,
+    a.is_deleted AS created_auction_is_deleted,
     a.winner_id as created_auction_winner_id,
     w.name AS winner_name,
     w.surname AS winner_surname,
@@ -211,10 +217,29 @@ SELECT
     u.name AS bidder_name,
     u.surname AS bidder_surname,
     u.username AS bidder_username,
-    u.image AS user_image  
+    u.image AS user_image,
+    a.status,
+    CASE 
+        WHEN b.amount = (
+            SELECT MAX(b2.amount)
+            FROM bids b2
+            WHERE b2.auction_id = b.auction_id
+        ) AND a.status = 'closed'
+        THEN 'bi bi-trophy-fill'
+        WHEN b.amount = (
+            SELECT MAX(b2.amount)
+            FROM bids b2
+            WHERE b2.auction_id = b.auction_id
+        )
+        THEN 'bi bi-star-fill'
+        ELSE ''
+    END AS bid_icon
 FROM 
     bids b
 JOIN 
     users u
 ON 
-    b.user_id = u.id;
+    b.user_id = u.id
+JOIN auctions a
+ON 
+a.id = b.auction_id;

@@ -20,10 +20,10 @@ body {
     margin-top: 10px;
 }
 .message.success {
-    color: #28a745; /* Green for success */
+    color: #28a745; 
 }
 .message.fail {
-    color: #dc3545; /* Red for failure */
+    color: #dc3545; 
 }
 
 /* LOGIN PAGE STYLES */
@@ -67,7 +67,11 @@ button {
 }
 
 button:hover {
-    background-color: #005f66;
+    background-color: var(--primary-color);
+}
+
+.background {
+    background-color: var(--primary-color);
 }
 
 .links {
@@ -330,16 +334,23 @@ button:hover {
     color: var(--primary-color);
   }
 
-/* Auction Cards */
 .card {
     border: 1px solid #ddd;
     border-radius: 10px;
     transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
   }
-  
+  .card:focus {
+    outline: 2px solid #007bff; 
+    outline-offset: 2px;
+  }
   .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .card .btn {
+    margin-right: 0.5rem;
   }
   
   .card-img-top {
@@ -356,6 +367,35 @@ button:hover {
 .card-text {
 color: #555;
 }
+
+#auction-details-div img {
+    max-height: 200px;
+    object-fit: cover;
+  }
+
+.card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Separatore visivo */
+    padding: 0.5rem 1rem;
+  }
+  .card-footer .btn {
+    font-size: 0.875rem; /* Bottoni più piccoli */
+  }
+  .card img {
+    object-fit: cover;
+    height: 200px;
+  }
+  .card-body h5 {
+    font-size: 1.25rem;
+  }
+  .card h1 {
+    font-size: 2rem;
+  }
+  
+  .text-truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 
 /* Sezioni principali */
 .section {
@@ -374,6 +414,16 @@ color: #555;
     gap: 20px;
     justify-content: center;
 }
+
+.list-group-item {
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  input[type="number"] {
+    max-width: 300px;
+    margin: 0 auto;
+  }
 
 /* Responsive */
 @media (max-width: 768px) {

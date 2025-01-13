@@ -2,15 +2,14 @@ services:
   app-chisso:
     container_name: app-chisso
     build: .
-    command: nodemon app.js --watch . --ext js,json
+    command: node app.js
     ports:
       - "3000:3000"
     volumes:
       - ./app:/usr/src/app
+      - /usr/src/app/node_modules
       - /etc/localtime:/etc/localtime:ro 
       - /etc/timezone:/etc/timezone:ro  
-    environment:
-      - TZ=Europe/Rome
     devices:
       - /dev/rtc:/dev/rtc:ro 
     env_file:
@@ -28,8 +27,6 @@ services:
       - ./app/config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    environment:
-      - TZ=Europe/Rome
     env_file:
       - ./app/.env
 

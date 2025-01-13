@@ -1,10 +1,7 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-
-
-const imagesPath = path.join(__dirname, '../public/images');
-
+const db = require('../config/db.js');
+const imagesPath = path.join(__dirname, '../public/static/images');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -18,10 +15,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const updateAuctionStatuses = async (req, res, next) => {
-  const mysql = await require('../config/db.js').connectToDatabase();
+  const mysql = await db.connectToDatabase();
   const currentDate = new Date();
   const year = currentDate.getFullYear();
-  const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // I mesi vanno da 0 a 11
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
   const day = String(currentDate.getDate()).padStart(2, '0');
   
   const formattedDate = `${year}-${month}-${day}`;
