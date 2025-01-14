@@ -86,17 +86,12 @@
           <div class="card shadow-sm" @click="showAuctionDetails(auction.auction_id)">
             <img :src="`static/images/${auction.auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
             <div class="card-body">
+              <span class="badge badge-pill mb-3" :class="auction.status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.status) }}</span>
               <h5 class="card-title">{{ auction.auction_title }}</h5>
               <p class="card-text">{{ auction.auction_description }}</p>
               <p class="card-text">
                 <strong>End Date: </strong> {{ formatDate(auction.end_date) }}
-              </p>
-              <p class="card-text">
-                <strong>Status: </strong> 
-                <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-                  {{ isAuctionClosed(auction.status) }}
-                </span>
-              </p>
+              </p>              
               <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>              
               <div class="d-flex align-items-center mt-3" v-if="auction.user_image && auction.user_name">
                 <img 
@@ -107,6 +102,7 @@
                 />
                 <p class="mb-0"><strong>Owner: </strong>{{ auction.user_name }} {{ auction.user_surname }}</p>
               </div>
+              
               <div class="d-flex justify-content-between mt-3" >
 
               <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
@@ -166,7 +162,7 @@
       <h2 class="mb-4">Your Auctions</h2>
       <div class="row g-4" v-if="selectedUserCreatedAuctions.length > 0">
         <div class="col-sm-6 col-lg-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
-          <div class="card shadow-sm h-100">
+          <div class="card shadow-sm h-100" :class="{ 'grayed-out': auction.created_auction_is_deleted }" @click="showAuctionDetails(auction.created_auction_id)">
             <img 
               :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
               class="card-img-top" 
@@ -174,14 +170,11 @@
               style="object-fit: cover; height: 200px;"
             />
             <div class="card-body d-flex flex-column">
+              <span v-if="!auction.created_auction_is_deleted" class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
               <h5 class="card-title">{{ auction.created_auction_title }}</h5>
               <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
               <p><strong>Current Price:</strong> € {{ auction.created_auction_current_price }}</p>
-              <p><strong>Status: </strong> 
-                <span :class="auction.created_auction_status === 'closed' ? 'text-danger' : 'text-success'">
-                  {{ isAuctionClosed(auction.created_auction_status) }}
-                </span>
-              </p>
+              
               <div class="d-flex align-items-center mt-auto" v-if="auction.winner_name">
                 <img 
                   :src="`static/images/${auction.winner_image || 'default-user.jpg'}`" 
@@ -196,12 +189,12 @@
             <div class="card-footer d-flex justify-content-between">
               <button v-if="isAuthenticated && user.id === auction.user_id"
                       class="p-2"
-                      @click="showEditAuctionDetails(auction.created_auction_id)">
+                      @click.stop="showEditAuctionDetails(auction.created_auction_id)">
                 <i class="bi bi-pencil-square"></i> Edit
               </button>
               <button v-if="isAuthenticated && user.id === auction.user_id"
                       class="p-2"
-                      @click="deleteAuction(auction.created_auction_id)">
+                      @click.stop="deleteAuction(auction.created_auction_id)">
                 <i class="bi bi-trash-fill"></i> Delete
               </button>
             </div>
@@ -216,7 +209,7 @@
       <h2 class="mb-4">Your Won Auctions</h2>
       <div class="row g-4" v-if="selectedUserWonAuctions.length > 0">
         <div class="col-sm-6 col-lg-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
-          <div class="card shadow-sm h-100">
+          <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
             <img 
               :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
               class="card-img-top" 
@@ -224,11 +217,10 @@
               style="object-fit: cover; height: 200px;"
             />
             <div class="card-body d-flex flex-column">
+              <span v-if="!auction.created_auction_is_deleted" class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
               <h5 class="card-title">{{ auction.created_auction_title }}</h5>
               <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
               <p><strong>Winning Bid:</strong> €{{ auction.bid_amount }}</p>
-              <p><strong>Status: </strong> {{ isAuctionClosed(auction.created_auction_status) }}
-              </p>
             </div>
           </div>
         </div>
@@ -256,12 +248,11 @@
             <h1 class="mb-3">{{ selectedAuction.auction_title }}</h1>
             <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
             <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
-            <p><strong>Status: </strong> 
-              <span :class="selectedAuction.status === 'closed' ? 'text-danger' : 'text-success'">
-                {{ isAuctionClosed(selectedAuction.status) }}
-              </span>
-            </p>
-            <p><strong>Current Price:</strong> ${{ selectedAuction.current_price }}</p>
+            <p>
+              <strong  v-if="selectedAuction.status === 'closed'">Winner Bid: </strong>
+              <strong  v-if="selectedAuction.status === 'open'">Current Bid: </strong>
+              € {{ selectedAuction.current_price }}</p>
+            <span class="badge badge-pill mb-3" :class="selectedAuction.status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(selectedAuction.status) }}</span>
             <div class="d-flex align-items-center mt-4" v-if="selectedAuction.seller_name">
               <img 
                 :src="`static/images/${selectedAuction.seller_image || 'default-user.jpg'}`" 
@@ -270,8 +261,8 @@
                 style="width: 50px; height: 50px;"
               />
               <p class="mb-0">
-                <strong  v-if="selectedAuction.status === 'open'">Owner: </strong>
-                 {{ selectedAuction.seller_name }} {{ selectedAuction.wseller_surname }}</p>
+                <strong>Owner: </strong>
+                 {{ selectedAuction.seller_name }} {{ selectedAuction.seller_surname }}</p>
             </div>
             <div class="d-flex align-items-center mt-4" v-if="selectedAuction.winner_name">
               <img 
@@ -335,22 +326,17 @@
         <h3 class="mb-4">Created Auctions</h3>
         <div class="row g-3" v-if="selectedUserCreatedAuctions.length > 0">
           <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
               <img 
                 :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
                 class="card-img-top" 
                 alt="Auction Image"
               />
-              <div class="card-body d-flex flex-column">
+              <div class="card-body">
+                <span class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
                 <h5 class="card-title">{{ auction.created_auction_title }}</h5>
                 <p class="card-text text-truncate">{{ auction.created_auction_description }}</p>
                 <p class="mb-1"><strong>Current Price:</strong> {{ auction.created_auction_current_price }}</p>
-                
-                <p><strong>Status:</strong> 
-                  <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-                    {{ isAuctionClosed(auction.created_auction_status) }} 
-                  </span>
-                </p>
                 <div v-if="auction.winner_name" class="mt-auto">
                   <div class="d-flex align-items-center">
                     <img 
@@ -359,7 +345,8 @@
                       class="rounded-circle me-2" 
                       style="width: 40px; height: 40px;"
                     />
-                    <p class="mb-0 text-muted"><strong>Winner:</strong> {{ auction.winner_name }} {{ auction.winner_surname }}</p>
+                    <p v-if="auction.created_auction_status === 'closed'" class="mb-0 text-muted">{{ auction.winner_name }} has won this auction!</p>
+                    <p class="mb-0 text-muted" v-if="auction.created_auction_status === 'open'">{{ auction.winner_name }} is winning this auction!</p>
                   </div>
                 </div>
               </div>
@@ -373,21 +360,17 @@
         <h3 class="mb-4">Won Auctions</h3>
         <div class="row g-3" v-if="selectedUserWonAuctions.length > 0">
           <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
               <img 
                 :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
                 class="card-img-top" 
                 alt="Auction Image"
               />
-              <div class="card-body d-flex flex-column">
+              <div class="card-body">
+                <span class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
                 <h5 class="card-title">{{ auction.created_auction_title }}</h5>
                 <p class="card-text text-truncate">{{ auction.created_auction_description }}</p>
                 <p class="mb-1"><strong>Winning Bid:</strong> {{ auction.bid_amount }}</p>
-                <p><strong>Status:</strong> 
-                  <span :class="auction.status === 'closed' ? 'text-danger' : 'text-success'">
-                    {{ isAuctionClosed(auction.created_auction_status) }}
-                  </span>
-                </p>
               </div>
             </div>
           </div>

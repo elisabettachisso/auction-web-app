@@ -425,6 +425,12 @@ color: #555;
     margin: 0 auto;
   }
 
+  .grayed-out {
+    filter: grayscale(100%);
+    opacity: 0.6; /* Facoltativo, per enfatizzare l'effetto */
+    pointer-events: none; /* Facoltativo, disabilita l'interazione */
+  }
+  
 /* Responsive */
 @media (max-width: 768px) {
     .card {

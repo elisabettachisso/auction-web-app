@@ -24,7 +24,7 @@ router.post("/", verifyToken, upload.single('image'), updateAuctionStatuses, asy
     const image = req.file ? req.file.filename : null;
 
     try {
-        const [result] = await mysql.query("INSERT INTO auctions (title, description, start_price, current_price, end_date, user_id, icon, image ) VALUES (?, ?, ?, ?, ?, ?, ?, ? )", [title, description, start_price, start_price, end_date, user_id, icon, image]);
+        const [result] = await mysql.query("INSERT INTO auctions (title, description, start_price, current_price, end_date, user_id, image ) VALUES (?, ?, ?, ?, ?, ?, ? )", [title, description, start_price, start_price, end_date, user_id, image]);
         res.status(201).json({
             id: result.insertId,
             title,
@@ -97,7 +97,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
             return res.status(403).json({ msg: "You are not authorized to delete this auction" });
         }
 
-        const query = `UPDATE auctions SET is_deleted = 1 WHERE id = ?`;
+        const query = `UPDATE auctions SET is_deleted = 1, status = 'closed' WHERE id = ?`;
         
         [result] = await mysql.query(query, [auctionId]);
         

@@ -194,25 +194,6 @@ const app = Vue.createApp({
     viewAuction(id) {
       window.location.href = `/auction/${id}`;
     },
-    async deleteAuction(id) {
-      try {
-        const response = await fetch(`/api/auctions/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
-        });
-        if (response.ok) {
-          this.auctions = this.auctions.filter(auction => auction.id !== id);
-          this.filteredAuctions = this.filteredAuctions.filter(auction => auction.id !== id);
-          console.log('Asta eliminata con successo.');
-        } else {
-          console.error('Errore durante l\'eliminazione dell\'asta.');
-        }
-      } catch (error) {
-        console.error('Errore:', error);
-      }
-    },
     logout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
@@ -235,9 +216,6 @@ const app = Vue.createApp({
       } catch (error) {
         console.error('Error showing modal:', error);
       }
-    },
-    showCreateBidModal() {
-      alert('Bid modal not implemented yet.');
     },
     handleFileUpload(event) {
       this.imageFile = event.target.files[0]; 
@@ -384,6 +362,10 @@ const app = Vue.createApp({
       }
     },  
     async deleteAuction(auctionId) {
+      const proceed = window.confirm('You are deleting this auction, are you sure you want to proceed?');
+          if (!proceed) {
+              return; 
+          }
       try {
         const response = await fetch(`/api/auctions/${auctionId}`, {
           method: 'DELETE',
@@ -393,8 +375,9 @@ const app = Vue.createApp({
         });
         if (response.ok) {
           this.auctions = this.auctions.filter(auction => auction.auction_id !== auctionId);
-          alert('Auction deleted successfully!');
           await this.fetchAuctions();
+          await this.fetchUserDetails(this.user.id);
+          alert('Auction deleted successfully!');          
         } else {
           const error = await response.json();
           alert(`Error: ${error.msg}`);
