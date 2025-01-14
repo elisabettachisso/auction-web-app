@@ -1,9 +1,9 @@
 /* GLOBAL STYLES */
 :root {
-    --primary-color: #007b8c; /* Green/Aqua primary color */
-    --secondary-color: #ff478e; /* Pink secondary color */
-    --text-color: #333; /* Dark gray for text */
-    --background-color: #f8f9fa; /* Light gray background */
+    --primary-color: #007b8c;
+    --secondary-color: #ff478e;
+    --text-color: #333; 
+    --background-color: #f8f9fa;
     --white-color: #ffffff;
 }
 
@@ -26,7 +26,8 @@ body {
     color: #dc3545; 
 }
 
-/* LOGIN PAGE STYLES */
+/*-------------------------------------------------*/
+/* Regole css per la pagina di Login */
 .panel {
     background: var(--white-color);
     border-radius: 15px;
@@ -92,7 +93,9 @@ button:hover {
     color: #005f66;
 }
 
-/* INDEX PAGE STYLES */
+/*-------------------------------------------------*/
+/* Regole css per la pagina Index */
+
 .split-layout {
     display: flex;
     height: 100vh;
@@ -216,7 +219,8 @@ button:hover {
     color: var(--text-color);
 }
 
-/* REGISTER PAGE STYLES */
+/*-------------------------------------------------*/
+/* Regole css per la pagina di Registrazione */
 
 #login-body {
     
@@ -282,7 +286,8 @@ button:hover {
 }
 
 
-/* HOME PAGE STYLES */
+/*-------------------------------------------------*/
+/* Regole css per la Home Page */
 
 /* Barra di ricerca */
 .search-bar {
@@ -374,11 +379,11 @@ color: #555;
   }
 
 .card-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Separatore visivo */
+    border-top: 1px solid rgba(0, 0, 0, 0.1); 
     padding: 0.5rem 1rem;
   }
   .card-footer .btn {
-    font-size: 0.875rem; /* Bottoni più piccoli */
+    font-size: 0.875rem; 
   }
   .card img {
     object-fit: cover;
@@ -396,8 +401,7 @@ color: #555;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-
-/* Sezioni principali */
+  
 .section {
     margin: 20px 0;
 }
@@ -427,8 +431,8 @@ color: #555;
 
   .grayed-out {
     filter: grayscale(100%);
-    opacity: 0.6; /* Facoltativo, per enfatizzare l'effetto */
-    pointer-events: none; /* Facoltativo, disabilita l'interazione */
+    opacity: 0.6; 
+    pointer-events: none; 
   }
   
 /* Responsive */
