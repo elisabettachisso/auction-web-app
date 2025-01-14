@@ -203,7 +203,6 @@
       </div>
       <p v-else class="text-muted">No created auctions found.</p>
     </div>
-    
 
     <div v-if="currentView === 'user-bids'" class="container mt-4">
       <h2 class="mb-4">Your Won Auctions</h2>
@@ -227,7 +226,6 @@
       </div>
       <p v-else class="text-muted">No won auctions found.</p>
     </div>
-    
 
     <div v-if="currentView === 'auction-details'" class="container mt-4" id="auction-details-div">
       <!-- Pulsante Torna Indietro -->
@@ -304,7 +302,6 @@
       </div>
     </div>
 
-
     <div v-if="currentView === 'selected-user-details'" class="container mt-4">
       <button class="btn btn-secondary mb-4" @click="showUsers"> <i class="bi bi-arrow-left-square-fill"></i> Back to Users</button>
       <div class="card shadow-sm p-4 mb-4">
@@ -378,7 +375,6 @@
         <p v-else class="text-muted">No won auctions found for this user.</p>
       </div>
     </div>
-    
 
     <div class="modal fade" id="createAuctionModal" tabindex="-1" aria-labelledby="createAuctionModalLabel" aria-hidden="true">
       <div class="modal-dialog">
