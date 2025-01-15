@@ -117,15 +117,24 @@ SELECT
     w.surname AS winner_surname,
     w.username AS winner_username,
     w.image AS winner_image,
-    a.user_id AS seller_id,
-    u.name AS seller_name,
-    u.surname AS seller_surname,
-    u.username AS seller_username,
-    u.image AS seller_image,
+    a.user_id AS user_id,
+    u.name AS user_name,
+    u.surname AS user_surname,
+    u.username AS user_username,
+    u.image AS user_image,
     b.id AS bid_id,
     b.amount AS bid_amount,
     b.user_id AS bidder_id,
-    b.is_winning_bid AS is_winning_bid,
+    b.auction_id AS bid_auction_id,
+    CASE 
+        WHEN b.amount = (
+            SELECT MAX(b2.amount)
+            FROM bids b2
+            WHERE b2.auction_id = b.auction_id
+        )
+        THEN 1
+        ELSE 0
+    END AS is_winning_bid,
     b.created_at AS bid_created_at,
     CASE 
         WHEN b.amount = (
@@ -154,26 +163,27 @@ LEFT JOIN
 CREATE OR REPLACE VIEW v_user_details AS
 SELECT
     u.id AS user_id,
-    u.username,
-    u.name,
-    u.surname,
+    u.name AS user_name,
+    u.surname AS user_surname,
+    u.username AS user_username,
     u.image AS user_image,
-    a.id AS created_auction_id,
-    a.title AS created_auction_title,
-    a.description AS created_auction_description,
-    a.start_price AS created_auction_start_price,
-    a.current_price AS created_auction_current_price,
-    a.end_date AS created_auction_end_date,
-    a.status AS created_auction_status,
-    a.image AS created_auction_image,
-    a.is_deleted AS created_auction_is_deleted,
-    a.winner_id as created_auction_winner_id,
+    a.id AS auction_id,
+    a.title AS auction_title,
+    a.description AS auction_description,
+    a.image AS auction_image,
+    a.start_price AS start_price,
+    a.current_price AS current_price,
+    a.end_date AS end_date,
+    a.status AS status,
+    a.is_deleted,
+    a.winner_id AS winner_id,
     w.name AS winner_name,
     w.surname AS winner_surname,
     w.username AS winner_username,
     w.image AS winner_image,
     b.id AS bid_id,
     b.amount AS bid_amount,
+    b.user_id AS bidder_id,
     b.auction_id AS bid_auction_id,
     CASE 
         WHEN b.amount = (
@@ -206,7 +216,7 @@ LEFT JOIN auctions a ON u.id = a.user_id
 LEFT JOIN users w ON w.id = a.winner_id 
 LEFT JOIN bids b ON a.id = b.auction_id;
 
-CREATE OR REPLACE VIEW v_bid_user AS
+CREATE OR REPLACE VIEW v_bid_details AS
 SELECT 
     b.id AS bid_id,
     b.auction_id,

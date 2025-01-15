@@ -1,16 +1,5 @@
 import { getToken, isAuthenticated } from './utils.js';
 
-import Navbar from './components/Navbar.js';
-import AuctionCard from './components/AuctionCard.js';
-import AuctionList from './components/AuctionList.js';
-import AuctionDetails from './components/AuctionDetails.js';
-import UsersList from './components/UsersList.js';
-import UserAuctions from './components/UserAuctions.js';
-import UserBids from './components/UserBids.js';
-import SelectedUserDetails from './components/SelectedUserDetails.js';
-import CreateAuctionModal from './components/CreateAuctionModal.js';
-import EditAuctionModal from './components/EditAuctionModal.js';
-
 const app = Vue.createApp({
   data() {
     return {
@@ -28,20 +17,19 @@ const app = Vue.createApp({
       auctionBids: [],
       newBidAmount: null,
       searchQuery: '',
-      searchQueryUsers: '',
       newAuction: {
         title: '',
         description: '',
         start_price: null,
         end_date: '',
-        image: null
+        image: null,
       },
       editedAuction: {
         id: null,
         title: '',
         description: ''
       },
-      imageFile: null
+      imageFile: null,
     };
   },
   methods: {
@@ -138,10 +126,9 @@ const app = Vue.createApp({
             console.error('Error during fetchAuctions:', error);
         }
     },
-    async filterAuctions(query) {
-      this.searchQuery = query;  
-      try {
-            const response = await fetch(`/api/auctions?q=${encodeURIComponent(query)}`);
+    async filterAuctions() {
+        try {
+            const response = await fetch(`/api/auctions?q=${encodeURIComponent(this.searchQuery)}`);
             console.log('Search query response:', response);
             if (response.ok) {
             const { auctions } = await response.json();
@@ -170,10 +157,9 @@ const app = Vue.createApp({
           console.error('Error during fetchBids', error);
       }
     },   
-    async placeBid(localBidAmount) {
-      console.log(localBidAmount);
+    async placeBid() {
       try {
-        if (!localBidAmount || localBidAmount <= this.selectedAuction.current_price) {
+        if (!this.newBidAmount || this.newBidAmount <= this.selectedAuction.current_price) {
           alert('Your bid must be higher than the current price.');
           return;
         }
@@ -190,7 +176,7 @@ const app = Vue.createApp({
         const response = await fetch(`/api/auctions/${this.selectedAuction.auction_id}/bids`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: localBidAmount }),
+          body: JSON.stringify({ amount: this.newBidAmount }),
         });
         if (response.ok) {
           alert('Bid placed successfully!');
@@ -204,28 +190,103 @@ const app = Vue.createApp({
         alert('An unexpected error occurred.');
       }
     },
+    viewAuction(id) {
+      window.location.href = `/auction/${id}`;
+    },
     logout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       window.location.reload();
     },
+    checkAuthentication() {
+      this.isAuthenticated = isAuthenticated();
+    },
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    isAuctionClosed(status) {
+      return status === 'closed' ? 'Auction Closed' : 'Auction Open';
+    },
+    showCreateAuctionModal() {
+      try {
+        const modal = new bootstrap.Modal(document.getElementById('createAuctionModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error showing modal:', error);
+      }
+    },
+    handleFileUpload(event) {
+      this.imageFile = event.target.files[0]; 
+      console.log('File selezionato:', this.imageFile)
+    },
+    async createAuction() {
+      console.log('Creating auction with data:', this.newAuction);
+      try {
+        const formData = new FormData(); 
+        formData.append('title', this.newAuction.title);
+        formData.append('description', this.newAuction.description);
+        formData.append('start_price', this.newAuction.start_price);
+        formData.append('end_date', this.newAuction.end_date);
+
+        if (this.imageFile) {
+          formData.append('image', this.imageFile);
+          console.log('FormData contiene il file:', this.imageFile.name);
+        } else {
+          console.warn('Nessun file selezionato!');
+        }
+    
+        const response = await fetch('/api/auctions', {
+          method: 'POST',
+          body: formData, 
+          credentials: 'include',
+        });
+    
+        if (response.ok) {
+          const auction = await response.json();
+          console.log('Auction created:', auction);
+    
+          const modal = bootstrap.Modal.getInstance(document.getElementById('createAuctionModal'));
+          modal.hide();
+    
+          this.newAuction = {
+            title: '',
+            description: '',
+            start_price: null,
+            end_date: '',
+            image: '',
+          };
+          this.imageFile = null;
+    
+          alert('Auction created successfully!');
+          await this.fetchAuctions(); 
+        } else {
+          const error = await response.json();
+          console.error('Error creating auction:', error);
+          alert(`Error: ${error.msg || 'Failed to create auction'}`);
+        }
+      } catch (error) {
+        console.error('Error during auction creation:', error);
+        alert('An unexpected error occurred.');
+      }
+    },
     showAuctions() {
-      this.currentView = 'auctions';
+      this.currentView = 'auctions'; 
     },
     showUsers() {
-      this.currentView = 'users';
+      this.currentView = 'users'; 
     },
     showUserAuctions() {
       this.currentView = 'user-auctions';
-      this.fetchUserDetails(this.user.id);
+      this.fetchUserDetails(this.user.id); 
     },
     showUserBids() {
       this.currentView = 'user-bids';
-      this.fetchUserDetails(this.user.id);
+      this.fetchUserDetails(this.user.id); 
     },
     showUserDetails(userId) {
       this.currentView = 'selected-user-details';
-      this.fetchUserDetails(userId);
+      this.fetchUserDetails(userId); 
     },
     async showAuctionDetails(auctionId) {
       try {
@@ -263,17 +324,17 @@ const app = Vue.createApp({
         alert("Unable to load auction details.");
       }
     },
-    async editAuction(payload) {
+    async editAuction() {
       try {
-        const response = await fetch(`/api/auctions/${payload.id}`, {
+        const response = await fetch(`/api/auctions/${this.editedAuction.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getToken()}`
           },
           body: JSON.stringify({
-            title: payload.title,
-            description: payload.description,
+            title: this.editedAuction.title,
+            description: this.editedAuction.description,
           }),
         });
         if (response.ok) {
@@ -323,92 +384,17 @@ const app = Vue.createApp({
         alert('An unexpected error occurred.');
       }
     },
-    showCreateAuctionModal() {
-      try {
-        const modal = new bootstrap.Modal(document.getElementById('createAuctionModal'));
-        modal.show();
-      } catch (error) {
-        console.error('Error showing modal:', error);
-      }
-    },
-    handleFileUpload(e) {
-      this.imageFile = e.target.files[0];
-    },
-    async createAuction(payload) {
-      console.log('Creating auction with data:', payload);
-      try {
-        const formData = new FormData(); 
-        formData.append('title', payload.title);
-        formData.append('description', payload.description);
-        formData.append('start_price', payload.start_price);
-        formData.append('end_date', payload.end_date);
-        
-        if (this.imageFile) {
-          formData.append('image', payload.imageFile);
-          console.log('FormData contiene il file:', payload.imageFile.name);
-        } else {
-          console.warn('Nessun file selezionato!');
-        }
-    
-        const response = await fetch('/api/auctions', {
-          method: 'POST',
-          body: formData, 
-          credentials: 'include',
-        });
-    
-        if (response.ok) {
-          const auction = await response.json();
-          console.log('Auction created:', auction);
-    
-          const modal = bootstrap.Modal.getInstance(document.getElementById('createAuctionModal'));
-          modal.hide();
-    
-          this.newAuction = {
-            title: '',
-            description: '',
-            start_price: null,
-            end_date: '',
-            image: '',
-          };
-          this.imageFile = null;
-    
-          alert('Auction created successfully!');
-          await this.fetchAuctions(); 
-        } else {
-          const error = await response.json();
-          console.error('Error creating auction:', error);
-          alert(`Error: ${error.msg || 'Failed to create auction'}`);
-        }
-      } catch (error) {
-        console.error('Error during auction creation:', error);
-        alert('An unexpected error occurred.');
-      }
-    },
-    checkAuthentication() {
-      this.isAuthenticated = isAuthenticated();
-    }
   },
   mounted() {
     this.checkAuthentication();
     if (this.isAuthenticated) {
       this.fetchUserData();
     } else {
-      this.user = null;
+        this.user = null;
     }
     this.fetchUsers();
     this.fetchAuctions();
-  }
+  },
 });
-
-app.component('navbar-x', Navbar);
-app.component('auction-card', AuctionCard);
-app.component('auction-list', AuctionList);
-app.component('auction-details', AuctionDetails);
-app.component('users-list', UsersList);
-app.component('user-auctions', UserAuctions);
-app.component('user-bids', UserBids);
-app.component('selected-user-details', SelectedUserDetails);
-app.component('create-auction-modal', CreateAuctionModal);
-app.component('edit-auction-modal', EditAuctionModal);
 
 app.mount('#home-app');

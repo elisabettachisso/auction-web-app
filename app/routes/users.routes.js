@@ -24,8 +24,8 @@ router.get("/users/:id", async (req, res) => {
         if (user.length === 0) {
             return res.status(404).json({ msg: "User not found" });
         }
-        const [userCreatedAuctions] = await mysql.query("SELECT DISTINCT user_id, username, name, surname, user_image, created_auction_id, created_auction_title, created_auction_description, created_auction_start_price, created_auction_current_price, created_auction_end_date, created_auction_status, created_auction_is_deleted, created_auction_image, created_auction_winner_id, winner_name, winner_surname, winner_username, winner_image FROM v_user_details WHERE user_id = ?", [userId]);
-        const [userWonAuctions] = await mysql.query("SELECT * FROM v_user_details WHERE is_winning_bid = 1 and created_auction_status = 'closed' and created_auction_winner_id = ?", [userId]);
+        const [userCreatedAuctions] = await mysql.query("SELECT DISTINCT user_id, user_username, user_name, user_surname, user_image, auction_id, auction_title, auction_description, start_price, current_price, end_date, status, is_deleted, auction_image, winner_id, winner_name, winner_surname, winner_username, winner_image FROM v_auction_details WHERE user_id = ?", [userId]);
+        const [userWonAuctions] = await mysql.query("SELECT * FROM v_auction_details WHERE is_winning_bid = 1 and status = 'closed' and winner_id = ?", [userId]);
         res.json({
             user: user[0],
             created_auctions: userCreatedAuctions,

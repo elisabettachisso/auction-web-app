@@ -2,452 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home | Used Guitars and Broken Dreams</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" 
+    rel="stylesheet">
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" 
+    rel="stylesheet">
   <link href="static/css/style.css" rel="stylesheet">
+
+  <!-- Carichiamo Vue 3 dal CDN -->
   <script src="https://unpkg.com/vue@3" defer></script>
 </head>
 <body>
   <div id="home-app">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-      <div class="container-fluid">
-        <a class="navbar-brand text-white" href="#"> <i class="bi bi-house-door-fill"></i> | Used Guitars and Broken Dreams</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#" @click.prevent="showAuctions"> <i class="bi bi-disc-fill"></i> Explore Auctions</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#" @click.prevent="showUsers"> <i class="bi bi-people-fill"></i> Other Users</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown" v-if="!isAuthenticated">
-              <a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Jump In!
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/login.html">Login</a>
-                <a class="dropdown-item" href="/register.html">Register</a>              
-              </div>
-            </li>
-            <li class="nav-item dropdown" v-if="isAuthenticated">
-              <a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="bi bi-person-circle"></i> {{ user ? `${user.name} ${user.surname}` : 'Loading...' }}
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
-                <a class="dropdown-item" href="#" @click.prevent="showUserAuctions">Your Auctions</a>
-                <a class="dropdown-item" href="#" @click.prevent="showUserBids">Your Winnings</a>
-              <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" @click="logout">Logout</a>
-              </div> 
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
 
-    <!-- Main content -->
-    <div v-if="currentView === 'auctions'" class="container mt-4" id="auctions-div">
-      <!-- Barra di ricerca -->
-      <div class="row mb-3 align-items-center">
-        <div class="col-md-6 d-flex">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            class="form-control" 
-            placeholder="Search for auctions..." 
-            style="max-width: 300px;"
-          />
-          <button 
-            class="btn btn-primary ms-2"
-            @click="filterAuctions">
-            <i class="bi bi-search"></i>
-          </button>
-        </div>
-        <div class="col-md-6 text-end">
-          <button 
-            v-if="isAuthenticated"
-            class="btn btn-success"
-            @click="showCreateAuctionModal">
-            <i class="bi bi-plus-circle"></i> Create Auction
-          </button>
-        </div>
-      </div>
+    <!-- Navbar come componente -->
+    <navbar-x      
+    :is-authenticated="isAuthenticated"
+      :user="user"
+      @show-auctions="showAuctions"
+      @show-users="showUsers"
+      @show-user-auctions="showUserAuctions"
+      @show-user-bids="showUserBids"
+      @logout="logout"
+    ></navbar-x>
 
-      <div class="row" id="auction-list">
-        <div class="col-md-4 mb-4" v-for="auction in filteredAuctions" :key="auction.auction_id">
-          <div class="card shadow-sm" @click="showAuctionDetails(auction.auction_id)">
-            <img :src="`static/images/${auction.auction_image || 'placeholder.png'}`" class="card-img-top" alt="Auction Image">
-            <div class="card-body">
-              <span class="badge badge-pill mb-3" :class="auction.status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.status) }}</span>
-              <h5 class="card-title">{{ auction.auction_title }}</h5>
-              <p class="card-text">{{ auction.auction_description }}</p>
-              <p class="card-text">
-                <strong>End Date: </strong> {{ formatDate(auction.end_date) }}
-              </p>              
-              <p class="card-text"><strong>Price: </strong> {{ auction.current_price }} </p>              
-              <div class="d-flex align-items-center mt-3" v-if="auction.user_image && auction.user_name">
-                <img 
-                  :src="`static/images/${auction.user_image || 'default-user.jpg'}`" 
-                  alt="User Icon" 
-                  class="rounded-circle me-2" 
-                  style="width: 40px; height: 40px;"
-                />
-                <p class="mb-0"><strong>Owner: </strong>{{ auction.user_name }} {{ auction.user_surname }}</p>
-              </div>
-              
-              <div class="d-flex justify-content-between mt-3" >
+    <!-- Sezione “auctions” -->
+    <auction-list
+      v-if="currentView === 'auctions'"
+      :filtered-auctions="filteredAuctions"
+      :search-query="searchQuery"
+      :is-authenticated="isAuthenticated"
+      :user="user"
+      @filter-auctions="filterAuctions"
+      @show-create-auction-modal="showCreateAuctionModal"
+      @select-auction="showAuctionDetails"
+      @edit-auction="showEditAuctionDetails"
+      @delete-auction="deleteAuction"
+    ></auction-list>
 
-              <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
-                @click.stop="showEditAuctionDetails(auction.auction_id)"
-                class="p-2">
-                <i class="bi bi-pencil-square"></i> Edit
-              </button>
-              <button v-if="isAuthenticated && user.id === auction.auction_creator_id"
-                      @click.stop="deleteAuction(auction.auction_id)"
-                      class="p-2">
-                  <i class="bi bi-trash-fill"></i> Delete
-              </button>
-            </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Sezione “users” -->
+    <users-list
+      v-else-if="currentView === 'users'"
+      :filtered-users="filteredUsers"
+      :search-query-users="searchQueryUsers"
+      @filter-users="filterUsers"
+      @select-user="showUserDetails"
+    ></users-list>
 
-    <div v-if="currentView === 'users'" class="container mt-4" id="users-div">
-    <div class="row mb-3 align-items-center">
-      <div class="col-md-6 d-flex">
-        <input 
-          type="text" 
-          v-model="searchQueryUsers" 
-          class="form-control" 
-          placeholder="Search for users..." 
-          style="max-width: 300px;"
-        />
-        <button 
-          class="btn btn-primary ms-2"
-          @click="filterUsers">
-          <i class="bi bi-search"></i>
-        </button>
-      </div>
-    </div>
+    <!-- Sezione “user-auctions” -->
+    <user-auctions
+      v-else-if="currentView === 'user-auctions'"
+      :auctions="selectedUserCreatedAuctions"
+      :is-authenticated="isAuthenticated"
+      :user="user"
+      @selectAuction="showAuctionDetails"
+      @editAuction="showEditAuctionDetails"
+      @deleteAuction="deleteAuction"
+    ></user-auctions>
 
-    <div class="row" id="users-list">
-      <div class="col-md-4 mb-4" v-for="user in filteredUsers" :key="user.id">
-        <div class="card shadow-sm">
-          <img :src="`static/images/${user.image || 'default-user.jpg'}`" class="card-img-top" alt="User Image">
-          <div class="card-body">
-            <h5 class="card-title">{{ user.name }} {{ user.surname }}</h5>
-            <p class="card-text">Username: {{ user.username }}</p>
-            <button 
-              class="mt-3"
-              @click="showUserDetails(user.id)">
-              User's details
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+    <!-- Sezione “user-bids” -->
+    <user-bids
+      v-else-if="currentView === 'user-bids'"
+      :auctions="selectedUserWonAuctions"
+      @selectAuction="showAuctionDetails"
+    ></user-bids>
 
-    <div v-if="currentView === 'user-auctions'" class="container mt-4">
-      <h2 class="mb-4">Your Auctions</h2>
-      <div class="row g-4" v-if="selectedUserCreatedAuctions.length > 0">
-        <div class="col-sm-6 col-lg-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
-          <div class="card shadow-sm h-100" :class="{ 'grayed-out': auction.created_auction_is_deleted }" @click="showAuctionDetails(auction.created_auction_id)">
-            <img 
-              :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
-              class="card-img-top" 
-              alt="Auction Image"
-              style="object-fit: cover; height: 200px;"
-            />
-            <div class="card-body d-flex flex-column">
-              <span v-if="!auction.created_auction_is_deleted" class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
-              <h5 class="card-title">{{ auction.created_auction_title }}</h5>
-              <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
-              <p><strong>Current Price:</strong> € {{ auction.created_auction_current_price }}</p>
-              
-              <div class="d-flex align-items-center mt-auto" v-if="auction.winner_name">
-                <img 
-                  :src="`static/images/${auction.winner_image || 'default-user.jpg'}`" 
-                  alt="User Icon" 
-                  class="rounded-circle me-2" 
-                  style="width: 40px; height: 40px;"
-                />
-                <p v-if="auction.created_auction_status === 'closed'" class="mb-0 text-muted">{{ auction.winner_name }} has won this auction!</p>
-                <p class="mb-0 text-muted" v-if="auction.created_auction_status === 'open'">{{ auction.winner_name }} is winning this auction!</p> 
-              </div>
-            </div>
-            <div class="card-footer d-flex justify-content-between">
-              <button v-if="isAuthenticated && user.id === auction.user_id"
-                      class="p-2"
-                      @click.stop="showEditAuctionDetails(auction.created_auction_id)">
-                <i class="bi bi-pencil-square"></i> Edit
-              </button>
-              <button v-if="isAuthenticated && user.id === auction.user_id"
-                      class="p-2"
-                      @click.stop="deleteAuction(auction.created_auction_id)">
-                <i class="bi bi-trash-fill"></i> Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p v-else class="text-muted">No created auctions found.</p>
-    </div>
+    <!-- Sezione “auction-details” -->
+    <auction-details
+      v-else-if="currentView === 'auction-details'"
+      :selected-auction="selectedAuction"
+      :auction-bids="auctionBids"
+      :is-authenticated="isAuthenticated"
+      :new-bid-amount="newBidAmount"
+      @back="showAuctions"
+      @place-bid="placeBid"
+    ></auction-details>
 
-    <div v-if="currentView === 'user-bids'" class="container mt-4">
-      <h2 class="mb-4">Your Won Auctions</h2>
-      <div class="row g-4" v-if="selectedUserWonAuctions.length > 0">
-        <div class="col-sm-6 col-lg-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
-          <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
-            <img 
-              :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
-              class="card-img-top" 
-              alt="Auction Image"
-              style="object-fit: cover; height: 200px;"
-            />
-            <div class="card-body d-flex flex-column">
-              <span v-if="!auction.created_auction_is_deleted" class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
-              <h5 class="card-title">{{ auction.created_auction_title }}</h5>
-              <p class="card-text text-muted">{{ auction.created_auction_description }}</p>
-              <p><strong>Winning Bid:</strong> €{{ auction.bid_amount }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p v-else class="text-muted">No won auctions found.</p>
-    </div>
+    <!-- Sezione “selected-user-details” -->
+    <selected-user-details
+      v-else-if="currentView === 'selected-user-details'"
+      :selected-user="selectedUser"
+      :selected-user-created-auctions="selectedUserCreatedAuctions"
+      :selected-user-won-auctions="selectedUserWonAuctions"
+      @back="showUsers"
+      @select-auction="showAuctionDetails"
+    ></selected-user-details>
 
-    <div v-if="currentView === 'auction-details'" class="container mt-4" id="auction-details-div">
-      <!-- Pulsante Torna Indietro -->
-      <button class="btn btn-secondary mb-4" @click="showAuctions"> <i class="bi bi-arrow-left-square-fill"></i> Back to Auctions</button>
+    <!-- Modale Creazione Asta -->
+    <create-auction-modal
+      :new-auction="newAuction"
+      @handle-file-upload="handleFileUpload"
+      @create-auction="createAuction"
+    ></create-auction-modal>
 
-      <!-- Sezione Dettagli dell'Asta -->
-      <div class="card shadow-sm p-4">
-        <div class="row g-4">
-          <!-- Immagine dell'Asta -->
-          <div class="col-md-4 text-center">
-            <img 
-              :src="`static/images/${selectedAuction.auction_image || 'placeholder.png'}`" 
-              alt="Auction Image" 
-              class="img-fluid rounded mb-3"
-            />
-          </div>
-          <div class="col-md-8">
-            <h1 class="mb-3">{{ selectedAuction.auction_title }}</h1>
-            <p><strong>Description:</strong> {{ selectedAuction.auction_description }}</p>
-            <p><strong>End Date:</strong> {{ formatDate(selectedAuction.end_date) }}</p>
-            <p>
-              <strong  v-if="selectedAuction.status === 'closed'">Winner Bid: </strong>
-              <strong  v-if="selectedAuction.status === 'open'">Current Bid: </strong>
-              € {{ selectedAuction.current_price }}</p>
-            <span class="badge badge-pill mb-3" :class="selectedAuction.status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(selectedAuction.status) }}</span>
-            <div class="d-flex align-items-center mt-4" v-if="selectedAuction.seller_name">
-              <img 
-                :src="`static/images/${selectedAuction.seller_image || 'default-user.jpg'}`" 
-                alt="User Icon" 
-                class="rounded-circle me-3" 
-                style="width: 50px; height: 50px;"
-              />
-              <p class="mb-0">
-                <strong>Owner: </strong>
-                 {{ selectedAuction.seller_name }} {{ selectedAuction.seller_surname }}</p>
-            </div>
-            <div class="d-flex align-items-center mt-4" v-if="selectedAuction.winner_name">
-              <img 
-                :src="`static/images/${selectedAuction.winner_image || 'default-user.jpg'}`" 
-                alt="User Icon" 
-                class="rounded-circle me-3" 
-                style="width: 50px; height: 50px;"
-              />
-              <p class="mb-0">
-                <strong  v-if="selectedAuction.status === 'closed'">Winner: </strong>
-                <strong  v-if="selectedAuction.status === 'open'">Winning User: </strong>
-                 {{ selectedAuction.winner_name }} {{ selectedAuction.winner_surname }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="mt-5">
-        <h3 class="mb-4">Bids</h3>
-        <div class="list-group">
-          <div 
-            class="list-group-item d-flex justify-content-between align-items-center" 
-            v-for="bid in auctionBids" 
-            :key="bid.bid_id"
-          >
-            <span>{{ bid.bidder_name }} bid € {{ bid.bid_amount }} on {{ formatDate(bid.bid_created_at) }} <i :class="selectedAuction.bid_icon"></i></span>
-            <span class="badge bg-primary rounded-pill">#{{ bid.bid_id }}</span>
-          </div>
-        </div>
-      </div>
-      <div v-if="isAuthenticated && selectedAuction.status !== 'closed'" class="mt-4">
-        <h4>Place Your Bid</h4>
-        <input 
-          type="number" 
-          v-model="newBidAmount" 
-          placeholder="Your bid amount" 
-          class="form-control mb-3"
-        />
-        <button class="btn btn-primary w-100" @click="placeBid">Place Bid</button>
-      </div>
-    </div>
+    <!-- Modale Edit Asta -->
+    <edit-auction-modal
+      :edited-auction="editedAuction"
+      @edit-auction="editAuction"
+    ></edit-auction-modal>
 
-    <div v-if="currentView === 'selected-user-details'" class="container mt-4">
-      <button class="btn btn-secondary mb-4" @click="showUsers"> <i class="bi bi-arrow-left-square-fill"></i> Back to Users</button>
-      <div class="card shadow-sm p-4 mb-4">
-        <div class="d-flex align-items-center">
-          <img 
-            :src="`static/images/${selectedUser.image || 'default-user.jpg'}`" 
-            alt="User Icon" 
-            class="rounded-circle me-3" 
-            style="width: 100px; height: 100px;"
-          />
-          <div>
-            <h2 class="mb-0">{{ selectedUser ? `${selectedUser.name} ${selectedUser.surname}` : 'User Details' }}</h2>
-            <p v-if="selectedUser" class="text-muted mb-0">Username: {{ selectedUser.username }}</p>
-          </div>
-        </div>
-      </div>
-    
-      <div class="mb-5">
-        <h3 class="mb-4">Created Auctions</h3>
-        <div class="row g-3" v-if="selectedUserCreatedAuctions.length > 0">
-          <div class="col-md-4" v-for="auction in selectedUserCreatedAuctions" :key="auction.created_auction_id">
-            <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
-              <img 
-                :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
-                class="card-img-top" 
-                alt="Auction Image"
-              />
-              <div class="card-body">
-                <span class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
-                <h5 class="card-title">{{ auction.created_auction_title }}</h5>
-                <p class="card-text text-truncate">{{ auction.created_auction_description }}</p>
-                <p class="mb-1"><strong>Current Price:</strong> {{ auction.created_auction_current_price }}</p>
-                <div v-if="auction.winner_name" class="mt-auto">
-                  <div class="d-flex align-items-center">
-                    <img 
-                      :src="`static/images/${auction.winner_image || 'default-user.jpg'}`" 
-                      alt="Winner Icon" 
-                      class="rounded-circle me-2" 
-                      style="width: 40px; height: 40px;"
-                    />
-                    <p v-if="auction.created_auction_status === 'closed'" class="mb-0 text-muted">{{ auction.winner_name }} has won this auction!</p>
-                    <p class="mb-0 text-muted" v-if="auction.created_auction_status === 'open'">{{ auction.winner_name }} is winning this auction!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p v-else class="text-muted">No created auctions found for this user.</p>
-      </div>
-    
-      <div>
-        <h3 class="mb-4">Won Auctions</h3>
-        <div class="row g-3" v-if="selectedUserWonAuctions.length > 0">
-          <div class="col-md-4" v-for="auction in selectedUserWonAuctions" :key="auction.created_auction_id">
-            <div class="card shadow-sm h-100" @click="showAuctionDetails(auction.created_auction_id)">
-              <img 
-                :src="`static/images/${auction.created_auction_image || 'placeholder.png'}`" 
-                class="card-img-top" 
-                alt="Auction Image"
-              />
-              <div class="card-body">
-                <span class="badge badge-pill mb-3" :class="auction.created_auction_status === 'closed' ? 'bg-danger' : 'bg-success'">{{ isAuctionClosed(auction.created_auction_status) }}</span>
-                <h5 class="card-title">{{ auction.created_auction_title }}</h5>
-                <p class="card-text text-truncate">{{ auction.created_auction_description }}</p>
-                <p class="mb-1"><strong>Winning Bid:</strong> {{ auction.bid_amount }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p v-else class="text-muted">No won auctions found for this user.</p>
-      </div>
-    </div>
-
-    <div class="modal fade" id="createAuctionModal" tabindex="-1" aria-labelledby="createAuctionModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="createAuctionModalLabel">Create New Auction</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="createAuction">
-              <div class="mb-3">
-                <label for="auctionTitle" class="form-label">Title</label>
-                <input type="text" v-model="newAuction.title" class="form-control" id="auctionTitle" required>
-              </div>
-              <div class="mb-3">
-                <label for="auctionDescription" class="form-label">Description</label>
-                <textarea v-model="newAuction.description" class="form-control" id="auctionDescription" rows="3" required></textarea>
-              </div>
-              <div class="mb-3">
-                <label for="auctionStartPrice" class="form-label">Start Price</label>
-                <input type="number" v-model="newAuction.start_price" class="form-control" id="auctionStartPrice" required>
-              </div>
-              <div class="mb-3">
-                <label for="auctionEndDate" class="form-label">End Date</label>
-                <input type="datetime-local" v-model="newAuction.end_date" class="form-control" id="auctionEndDate" required>
-              </div>
-              <div class="mb-3">
-                <label for="auctionImage" class="form-label">Upload Image</label>
-                <input 
-                  type="file" 
-                  class="form-control" 
-                  id="auctionImage" 
-                  @change="handleFileUpload" 
-                  name="image" 
-                  accept="image/*">
-              </div>          
-              <button type="submit" class="btn btn-primary">Create</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Edit Auction Modal -->
-    <div class="modal fade" id="editAuctionModal" tabindex="-1" aria-labelledby="editAuctionModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editAuctionModalLabel">Edit Auction</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="editAuction">
-              <div class="mb-3">
-                <label for="editAuctionTitle" class="form-label">Title</label>
-                <input type="text" id="editAuctionTitle" v-model="editedAuction.title" class="form-control" required>
-              </div>
-              <div class="mb-3">
-                <label for="editAuctionDescription" class="form-label">Description</label>
-                <textarea id="editAuctionDescription" v-model="editedAuction.description" class="form-control" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
+
   <footer class="text-center py-3">
     <p>Used Guitars and Broken Dreams.</p>
   </footer>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="static/js/home.js"  type="module" defer></script>
-</body>
 
+  <!-- Bootstrap JS -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js">
+  </script>
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js">
+  </script>
+
+  <!-- Il nostro script principale in modalità module -->
+  <script type="module" src="static/js/home.js" defer></script>
+</body>
 </html>
