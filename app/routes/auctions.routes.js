@@ -114,7 +114,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 router.get("/:id/bids", async (req, res) => {
     const mysql = await db.connectToDatabase();    
     try {
-        const [bids] = await mysql.query("SELECT * FROM v_bid_user WHERE auction_id = ?", [parseInt(req.params.id)]);
+        const [bids] = await mysql.query("SELECT * FROM v_bid_details WHERE auction_id = ?", [parseInt(req.params.id)]);
         res.json({bids});
     } catch (error) {
         console.error("Error fetching bids:", error);

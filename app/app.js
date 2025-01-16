@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 dotenv.config();
 
-app.use(express.static("public"));
+app.use(express.static("public-without-components"));
 app.use(express.json());
 app.use(cookieParser());
 
