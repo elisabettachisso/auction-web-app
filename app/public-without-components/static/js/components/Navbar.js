@@ -4,8 +4,8 @@ export default {
   template: `
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
-        <a class="navbar-brand text-white" href="#">
-          <i class="bi bi-house-door-fill"></i> | Used Guitars
+        <a class="navbar-brand text-white" href="/index.html">
+          <i class="bi bi-house-door-fill"></i> | Riff Market
         </a>
         <button
           class="navbar-toggler"

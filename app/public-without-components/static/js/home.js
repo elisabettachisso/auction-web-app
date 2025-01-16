@@ -1,7 +1,6 @@
 import { getToken, isAuthenticated } from './utils.js';
 import Navbar from './components/Navbar.js';
 import AuctionCard from './components/AuctionCard.js';
-import UserCard from './components/UserCard.js';
 
 const app = Vue.createApp({
   data() {
@@ -9,6 +8,7 @@ const app = Vue.createApp({
       currentView: 'auctions',
       isAuthenticated: false,
       user: null,
+      authenticatedUserId: null,
       users: [],
       filteredUsers: [],
       selectedUser: null,
@@ -20,6 +20,7 @@ const app = Vue.createApp({
       auctionBids: [],
       newBidAmount: null,
       searchQuery: '',
+      searchQueryUsers: '',
       newAuction: {
         title: '',
         description: '',
@@ -47,6 +48,7 @@ const app = Vue.createApp({
           const userData = await response.json();
           this.user = userData; 
           this.isAuthenticated = true;
+          this.authenticatedUserId = userData.id;
           console.log('User data:', this.user);
           if (this.user && this.user.id) {
             await this.fetchUserDetails(this.user.id);
@@ -68,7 +70,6 @@ const app = Vue.createApp({
           console.log('Response from /api/users:', response);
           if (response.ok) {
           const { users } = await response.json();
-          this.users = users;
           this.filteredUsers = users;
           console.log('Fetched users:', users);
           } else {
@@ -402,6 +403,5 @@ const app = Vue.createApp({
 
 app.component('navbar-x', Navbar);
 app.component('auction-card', AuctionCard);
-app.component('user-card', UserCard);
 
 app.mount('#home-app');
