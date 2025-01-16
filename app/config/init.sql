@@ -39,6 +39,14 @@ CREATE TABLE IF NOT EXISTS bids (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 INSERT IGNORE INTO users (username, password, name, surname, image) VALUES
 ('calcuttafan', '$2b$10$VOdtzJZz8JfHO.S63./tWuDtrbXRr68ppcdxGvMXCvNdNl3ait6Uu', 'Edoardo', 'D''Erme', 'calcutta.jpg'),
 ('gazellefan', '$2b$10$VOdtzJZz8JfHO.S63./tWuDtrbXRr68ppcdxGvMXCvNdNl3ait6Uu', 'Flavio', 'Bruno', 'gazzelle.jpg'),

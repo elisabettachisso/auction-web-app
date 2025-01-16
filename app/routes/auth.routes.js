@@ -54,6 +54,7 @@ router.post("/signin", async (req, res) => {
                 expiresIn: 86400,
             });
             res.cookie("token", token, {httpOnly: true});
+            await mysql.query('INSERT INTO logs (user_id, action) VALUES (?, ?)', [user.id, "User signed in"]);
             res.status(200).json({ 
                 msg: "Login successful!",
                 redirectUrl: "/home.html",
