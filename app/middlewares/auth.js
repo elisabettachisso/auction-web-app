@@ -2,11 +2,10 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies["token"];
-    console.log("Received token:", token);
 
     if (!token) {       
         console.log("Token missing or not provided"); 
-        return res.status(403).json({ msg: "Autenticazione fallita" });
+        return res.status(403).json({ msg: "Failed Authentication" });
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

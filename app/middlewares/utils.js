@@ -26,17 +26,12 @@ const updateAuctionStatuses = async (req, res, next) => {
   console.log("Local current date:", formattedDate);
 
   try {
-      const closedUpdate = await mysql.query(
-          "UPDATE auctions SET status = 'closed' WHERE end_date < ? AND status != 'closed'",
-          [formattedDate]
+      await mysql.query(
+          "UPDATE auctions SET status = 'closed' WHERE end_date < ? AND status != 'closed'", [formattedDate]
       );
-      console.log("Closed auctions updated:", closedUpdate.affectedRows);
 
-      const openUpdate = await mysql.query(
-          "UPDATE auctions SET status = 'open' WHERE end_date > ? AND status != 'open'",
-          [formattedDate]
+      await mysql.query("UPDATE auctions SET status = 'open' WHERE end_date > ? AND status != 'open'", [formattedDate]
       );
-      console.log("Open auctions updated:", openUpdate.affectedRows);
 
       next();
   } catch (error) {

@@ -150,9 +150,7 @@ const app = Vue.createApp({
           const response = await fetch(`/api/auctions/${auctionId}/bids`);
           if (response.ok) {
             const data = await response.json();
-            console.log("data: ", data)
             this.auctionBids = data.bids;
-            console.log(this.auctionBids)
           console.log('Fetched bids:', data.bids);
           } else {
           console.error('Error fetching bids. Response status:', response.status);
@@ -194,9 +192,6 @@ const app = Vue.createApp({
         alert('An unexpected error occurred.');
       }
     },
-    viewAuction(id) {
-      window.location.href = `/auction/${id}`;
-    },
     logout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
@@ -222,7 +217,7 @@ const app = Vue.createApp({
     },
     handleFileUpload(event) {
       this.imageFile = event.target.files[0]; 
-      console.log('File selezionato:', this.imageFile)
+      console.log('Selected file:', this.imageFile)
     },
     async createAuction() {
       console.log('Creating auction with data:', this.newAuction);
@@ -235,9 +230,9 @@ const app = Vue.createApp({
 
         if (this.imageFile) {
           formData.append('image', this.imageFile);
-          console.log('FormData contiene il file:', this.imageFile.name);
+          console.log('FormData file:', this.imageFile.name);
         } else {
-          console.warn('Nessun file selezionato!');
+          console.warn('No selected file!');
         }
     
         const response = await fetch('/api/auctions', {
@@ -315,7 +310,6 @@ const app = Vue.createApp({
           alert("Auction not found.");
           return;
         }
-
         this.editedAuction = {
           id: auction.auction_id,
           title: auction.auction_title,

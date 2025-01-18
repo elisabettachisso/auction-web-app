@@ -7,8 +7,13 @@ export default {
           <img :src="imagePath" class="card-img-top" alt="Auction Image">
           <div class="card-body">
             <span class="badge badge-pill mb-3" 
-                  :class="auction.status === 'closed' ? 'bg-danger' : 'bg-success'">
+                  :class="auction.status === 'closed' ? 'bg-danger' : 'bg-success'"
+                  v-if="!auction.is_deleted">
               {{ isAuctionClosed(auction.status) }}
+            </span>
+            <span class="badge badge-pill mb-3 bg-danger"
+                  v-if="auction.is_deleted">
+              Deleted
             </span>
             <h5 class="card-title">{{ auction.auction_title }}</h5>
             <p class="card-text">{{ auction.auction_description }}</p>
@@ -29,14 +34,14 @@ export default {
   
             <div class="d-flex justify-content-between mt-3">
               <button
-                v-if="isAuthenticated && user && user.id === auction.auction_creator_id"
+                v-if="isAuthenticated && user && user.id === auction.user_id && auction.status !== 'closed'"
                 @click.stop="editAuction"
                 class="p-2"
               >
                 <i class="bi bi-pencil-square"></i> Edit
               </button>
               <button
-                v-if="isAuthenticated && user && user.id === auction.auction_creator_id"
+                v-if="isAuthenticated && user && user.id === auction.user_id && auction.status !== 'closed'"
                 @click.stop="deleteAuction"
                 class="p-2"
               >
