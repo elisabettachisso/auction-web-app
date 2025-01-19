@@ -51,7 +51,7 @@ router.post('/signin', async (req, res) => {
             const token = jwt.sign(data, process.env.JWT_SECRET, {
                 expiresIn: 86400,
             });
-            res.cookie('token', token, {httpOnly: true});
+            res.cookie('token', token, {httpOnly: true, path: '/'},);
             await mysql.query("INSERT INTO logs (user_id, action) VALUES (?, ?)", [user.id, 'User signed in']);
             res.status(200).json({ 
                 msg: 'Login successful!',
@@ -63,6 +63,14 @@ router.post('/signin', async (req, res) => {
         console.log(error);
         res.status(500).json({ msg: 'Internal Error' });
     }
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        path: '/',
+    });
+    res.status(200).json({ msg: 'Logout successful!' });
 });
 
 module.exports = router;

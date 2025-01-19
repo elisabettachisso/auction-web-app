@@ -1,4 +1,3 @@
-import { getToken, isAuthenticated } from './utils.js';
 import Navbar from './components/Navbar.js';
 import AuctionCard from './components/AuctionCard.js';
 
@@ -142,6 +141,7 @@ const app = Vue.createApp({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: this.newBidAmount }),
+          credentials: 'include',
         });
         if (response.ok) {
           console.log('Bid placed successfully!');
@@ -155,13 +155,22 @@ const app = Vue.createApp({
         alert('Failed to place bid.');
       }
     },
-    logout() {
-      localStorage.removeItem('token');
-      this.isAuthenticated = false;
-      window.location.reload();
-    },
-    checkAuthentication() {
-      this.isAuthenticated = isAuthenticated();
+    async logout() {
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          this.isAuthenticated = false;
+          this.user = null;
+          window.location.reload(); 
+        } else {
+          console.error('Faild logout.');
+        }
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
     },
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -338,12 +347,7 @@ const app = Vue.createApp({
     },
   },
   mounted() {
-    this.checkAuthentication();
-    if (this.isAuthenticated) {
-      this.fetchUserData();
-    } else {
-        this.user = null;
-    }
+    this.fetchUserData();
     this.fetchUsers();
     this.fetchAuctions();
   },

@@ -1,5 +1,3 @@
-import { saveToken } from './utils.js';
-
 const app = Vue.createApp({
     data() {
         return {
@@ -25,6 +23,7 @@ const app = Vue.createApp({
                 const response = await fetch('/api/auth/signin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         username: this.username,
                         password: this.password,
@@ -35,7 +34,6 @@ const app = Vue.createApp({
                 if (response.ok) {
                     this.message = 'Login successful!';
                     this.success = true;
-                    saveToken(result.token);
                     window.location.href = result.redirectUrl || '/home.html';
                 } else {
                     this.message = result.msg || 'Login failed. Please try again.';

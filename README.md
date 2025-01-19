@@ -38,7 +38,6 @@ Contains custom middleware for:
 - **`home.js`**: Implements the core functionality of the front end using Vue.js. It manages the application state, user interactions, and API calls for fetching auctions, bids, and user data.- 
 - **`login.js`**: Manages the user login process.
 - **`register.js`**: Handles the registration of new users.
-- **`utils.js`**: Collects common functions for JWT token handling.
 
 ##### Components:
 

@@ -88,7 +88,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     const userId = req.userId;
     console.log(userId);
     try {
-        const [auction] = await mysql.query("SELECT user_id FROM auctions WHERE id = ?", [auctionId]);
+        const [auction] = await mysql.query("SELECT * FROM auctions WHERE id = ?", [auctionId]);
 
         if (!auction || auction.length === 0) {
             return res.status(404).json({ msg: 'Auction not found' });
