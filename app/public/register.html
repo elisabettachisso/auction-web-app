@@ -17,7 +17,7 @@
       <input type="text" v-model="name" placeholder="First Name" required />
       <input type="text" v-model="surname" placeholder="Last Name" required />
       <button type="submit">Register</button>
-      <p v-if="message">{{ message }}</p>
+      <p v-if="message" :class="{'message': true, 'text-success': success, 'text-fail': fail }">{{ message }}</p>
     </form>
     <div class="links">
       <a href="/login.html">Already have an account? Login</a>
