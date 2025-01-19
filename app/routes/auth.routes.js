@@ -49,7 +49,7 @@ router.post('/signin', async (req, res) => {
         } else {
             const data = { id: user.id };
             const token = jwt.sign(data, process.env.JWT_SECRET, {
-                expiresIn: 86400,
+                expiresIn: 1728000,
             });
             res.cookie('token', token, {httpOnly: true, path: '/'},);
             await mysql.query("INSERT INTO logs (user_id, action) VALUES (?, ?)", [user.id, 'User signed in']);

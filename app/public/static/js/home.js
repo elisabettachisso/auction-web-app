@@ -144,7 +144,8 @@ const app = Vue.createApp({
           credentials: 'include',
         });
         if (response.ok) {
-          console.log('Bid placed successfully!');
+          console.log('Bid placed successfully!');          
+          this.newBidAmount = null;
           this.fetchBidsForAuction(this.selectedAuction.auction_id);
           this.showAuctionDetails(this.selectedAuction.auction_id);
         } else {
