@@ -36,7 +36,7 @@ const app = Vue.createApp({
                 }
             } catch (error) {
                 this.message = 'Errore durante la registrazione.';
-                console.error("Errore nella registrazione:", error);
+                console.error('Errore nella registrazione:', error);
             }
         },
     },

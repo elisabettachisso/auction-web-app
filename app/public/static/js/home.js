@@ -9,12 +9,10 @@ const app = Vue.createApp({
       isAuthenticated: false,
       user: null,
       authenticatedUserId: null,
-      users: [],
       filteredUsers: [],
       selectedUser: null,
       selectedUserCreatedAuctions: [],
       selectedUserWonAuctions: [],
-      auctions: [],
       filteredAuctions: [],
       selectedAuction: null,
       auctionBids: [],
@@ -26,7 +24,6 @@ const app = Vue.createApp({
         description: '',
         start_price: null,
         end_date: '',
-        image: null,
       },
       editedAuction: {
         id: null,
@@ -42,8 +39,7 @@ const app = Vue.createApp({
         const response = await fetch('/api/whoami', {
           method: 'GET',
           credentials: 'include',
-        });
-    
+        });    
         if (response.ok) {
           const userData = await response.json();
           this.user = userData; 
@@ -66,29 +62,14 @@ const app = Vue.createApp({
     },
     async fetchUsers() {
       try {
-          const response = await fetch('/api/users');
-          console.log('Response from /api/users:', response);
-          if (response.ok) {
-          const { users } = await response.json();
-          this.filteredUsers = users;
-          console.log('Fetched users:', users);
-          } else {
-          console.error('Error fetching users. Response status:', response.status);
-          }
-      } catch (error) {
-          console.error('Error during fetchUsers:', error);
-      }
-    },
-    async filterUsers() {
-      try {
           const response = await fetch(`/api/users?q=${encodeURIComponent(this.searchQueryUsers)}`);
           console.log('Search query response:', response);
           if (response.ok) {
-          const { users } = await response.json();
-          this.filteredUsers = users;
-          console.log('Filtered users:', users);
+            const { users } = await response.json();
+            this.filteredUsers = users.filter(users => users.id !== this.authenticatedUserId );
+            console.log('Filtered users:', this.filteredUsers);
           } else {
-          console.error('Error during search. Response status:', response.status);
+            console.error('Error filtering users. Response status:', response.status);
           }
       } catch (error) {
           console.error('Error during filterUsers:', error);
@@ -98,60 +79,40 @@ const app = Vue.createApp({
       try {
         const response = await fetch(`/api/users/${userId}`);
         if (response.ok) {
-          const data = await response.json();
-          
+          const data = await response.json();          
           this.selectedUser = data.user || null;
           this.selectedUserCreatedAuctions = data.created_auctions || [];
-          this.selectedUserWonAuctions = data.won_auctions || [];
-          
-          console.log('Selected User:', this.selectedUser);
-          console.log('Selected User Created Auctions:', this.selectedUserCreatedAuctions);
-          console.log('Selected User Won Auctions:', this.selectedUserWonAuctions);
+          this.selectedUserWonAuctions = data.won_auctions || [];  
         } else {
-          console.error('Error fetching user details:', await response.json());
+          console.error('Error fetching user details. Response status:', response.status);
         }
       } catch (error) {
         console.error('Error fetching user details:', error);
       }
     },        
     async fetchAuctions() {
-        try {
-            const response = await fetch('/api/auctions');
-            console.log('Response from /api/auctions:', response);
-            if (response.ok) {
-            const { auctions } = await response.json();
-            this.auctions = auctions;
-            this.filteredAuctions = auctions;
-            console.log('Fetched auctions:', auctions);
-            } else {
-            console.error('Error fetching auctions. Response status:', response.status);
-            }
-        } catch (error) {
-            console.error('Error during fetchAuctions:', error);
-        }
-    },
-    async filterAuctions() {
-        try {
-            const response = await fetch(`/api/auctions?q=${encodeURIComponent(this.searchQuery)}`);
-            console.log('Search query response:', response);
-            if (response.ok) {
+      try {
+          const response = await fetch(`/api/auctions?q=${encodeURIComponent(this.searchQuery)}`);
+          console.log('Search query response:', response);
+          if (response.ok) {
             const { auctions } = await response.json();
             this.filteredAuctions = auctions;
             console.log('Filtered auctions:', auctions);
-            } else {
+          } else {
             console.error('Error during search. Response status:', response.status);
-            }
-        } catch (error) {
-            console.error('Error during filterAuctions:', error);
-        }
+          }
+      } catch (error) {
+          console.error('Error during filterAuctions:', error);
+      }
     },
     async fetchBidsForAuction(auctionId) {
       try {
           const response = await fetch(`/api/auctions/${auctionId}/bids`);
           if (response.ok) {
             const data = await response.json();
+            console.log('Data:', data);
             this.auctionBids = data.bids;
-          console.log('Fetched bids:', data.bids);
+            console.log('Fetched bids:', data.bids);
           } else {
           console.error('Error fetching bids. Response status:', response.status);
           }
@@ -161,14 +122,16 @@ const app = Vue.createApp({
     },   
     async placeBid() {
       try {
+        if (this.user.id === this.selectedAuction.user_id || this.selectedAuction.status === 'closed') {
+          alert('You cannot bid on this auction.');
+          return;
+        }
+
         if (!this.newBidAmount || this.newBidAmount <= this.selectedAuction.current_price) {
           alert('Your bid must be higher than the current price.');
           return;
         }
-        if (this.isOwner || this.isAuctionExpired) {
-          alert('You cannot bid on this auction.');
-          return;
-        }
+
         if (this.user.id === this.selectedAuction.winner_id) {
           const proceed = window.confirm('You are already the user who is winning this auction, are you sure you want to proceed with placing an offer?');
           if (!proceed) {
@@ -181,7 +144,7 @@ const app = Vue.createApp({
           body: JSON.stringify({ amount: this.newBidAmount }),
         });
         if (response.ok) {
-          alert('Bid placed successfully!');
+          console.log('Bid placed successfully!');
           this.fetchBidsForAuction(this.selectedAuction.auction_id);
           this.showAuctionDetails(this.selectedAuction.auction_id);
         } else {
@@ -189,7 +152,7 @@ const app = Vue.createApp({
         }
       } catch (error) {
         console.error('Error placing bid:', error);
-        alert('An unexpected error occurred.');
+        alert('Failed to place bid.');
       }
     },
     logout() {
@@ -253,7 +216,6 @@ const app = Vue.createApp({
             description: '',
             start_price: null,
             end_date: '',
-            image: '',
           };
           this.imageFile = null;
     
@@ -270,10 +232,14 @@ const app = Vue.createApp({
       }
     },
     showAuctions() {
+      this.searchQuery = '';
+      this.fetchAuctions();
       this.currentView = 'auctions'; 
     },
     showUsers() {
-      this.currentView = 'users'; 
+      this.searchQueryUsers = '';
+      this.fetchUsers();      
+      this.currentView = 'users';
     },
     showUserAuctions() {
       this.currentView = 'user-auctions';
@@ -305,11 +271,7 @@ const app = Vue.createApp({
     },
     async showEditAuctionDetails(auctionId) {
       try {
-        const auction = this.auctions.find(a => a.auction_id === auctionId);
-        if (!auction) {
-          alert("Auction not found.");
-          return;
-        }
+        const auction = this.filteredAuctions.find(a => a.auction_id === auctionId);
         this.editedAuction = {
           id: auction.auction_id,
           title: auction.auction_title,
@@ -318,31 +280,26 @@ const app = Vue.createApp({
         const modal = new bootstrap.Modal(document.getElementById('editAuctionModal'));
         modal.show();
       } catch (error) {
-        console.error("Error showing edit auction details:", error);
-        alert("Unable to load auction details.");
+        console.error('Error showing edit auction details:', error);
+        alert('Unable to load auction details.');
       }
     },
     async editAuction() {
+      console.log('Edited Auction ID:', this.editedAuction.id);
+      const editedAuctionData =  JSON.stringify({
+        title: this.editedAuction.title,
+        description: this.editedAuction.description,
+      });
       try {
         const response = await fetch(`/api/auctions/${this.editedAuction.id}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            title: this.editedAuction.title,
-            description: this.editedAuction.description,
-          }),
+          body: editedAuctionData,        
+          credentials: 'include',
         });
         if (response.ok) {
-          const updatedAuction = await response.json();
-          const auctionIndex = this.auctions.findIndex(a => a.auction_id === updatedAuction.id);
-          this.auctions[auctionIndex] = {
-            ...this.auctions[auctionIndex],
-            title: updatedAuction.updatedFields.title,
-            description: updatedAuction.updatedFields.description,
-          };
           alert('Auction updated successfully!');
           const modal = bootstrap.Modal.getInstance(document.getElementById('editAuctionModal'));
           modal.hide();
@@ -369,7 +326,6 @@ const app = Vue.createApp({
           }
         });
         if (response.ok) {
-          this.auctions = this.auctions.filter(auction => auction.auction_id !== auctionId);
           await this.fetchAuctions();
           await this.fetchUserDetails(this.user.id);
           alert('Auction deleted successfully!');          

@@ -43,7 +43,7 @@ const app = Vue.createApp({
                 }                
             } catch (error) {
                 this.message = 'Login failed. Please try again.';
-                console.error("Errore nel login:", error);
+                console.error('Errore nel login:', error);
             }
         },
     },

@@ -5,10 +5,10 @@ let cachedDb;
 module.exports = {
     connectToDatabase: async () => {
         if (cachedDb && cachedDb.state !== 'disconnected') {
-            console.log("Existing cached connection found!");
+            console.log('Existing cached connection found!');
             return cachedDb;
         }  
-        console.log("Acquiring new DB connection...");
+        console.log('Acquiring new DB connection...');
         try {
             const db = await mysql.createConnection({
                 host: process.env.DB_HOST || 'mysql-db-chisso' || 'localhost',
@@ -17,11 +17,11 @@ module.exports = {
                 password: process.env.DB_PASSWORD,
                 database: process.env.DB_NAME,
               });
-            console.log("New MySQL connection established!");  
+            console.log('New MySQL connection established!');  
             cachedDb = db;
             return db;
         } catch (error) {
-            console.error("Error acquiring DB connection!");
+            console.error('Error acquiring DB connection!');
             console.error(error);
             throw error;
         }

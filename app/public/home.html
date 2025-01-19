@@ -35,7 +35,7 @@
           />
           <button 
             class="btn ms-2 btn-search"
-            @click="filterAuctions">
+            @click="fetchAuctions">
             <i class="bi bi-search"></i>
           </button>
         </div>
@@ -64,43 +64,42 @@
     </div>
 
     <div v-if="currentView === 'users'" class="container mt-4" id="users-div">
-    <div class="row mb-3 align-items-center">
-      <div class="col-md-6 d-flex">
-        <input 
-          type="text" 
-          v-model="searchQueryUsers" 
-          class="form-control" 
-          placeholder="Search for users..." 
-          style="max-width: 300px;"
-        />
-        <button 
-          class="btn btn-search ms-2"
-          @click="filterUsers">
-          <i class="bi bi-search"></i>
-        </button>
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6 d-flex">
+          <input 
+            type="text" 
+            v-model="searchQueryUsers" 
+            class="form-control" 
+            placeholder="Search for users..." 
+            style="max-width: 300px;"
+          />
+          <button 
+            class="btn btn-search ms-2"
+            @click="fetchUsers">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="row" id="users-list">
-      <div class="col-md-4 mb-4" v-for="filteruser in filteredUsers" :key="filteruser.id">
-        <div class="card shadow-sm" v-if="filteruser.id !== authenticatedUserId">
-          <img :src="`static/images/${filteruser.image || 'default-user.jpg'}`" class="card-img-top" alt="User Image">
-          <div class="card-body">
-            <h5 class="card-title">{{ filteruser.name }} {{ filteruser.surname }}</h5>
-            <p class="card-text">Username: {{ filteruser.username }}</p>
-            <button 
-              class="mt-3"
-              @click="showUserDetails(filteruser.id)">
-              User's details
-            </button>
+      <div class="row" id="users-list">
+        <div class="col-md-4 mb-4" v-for="filteruser in filteredUsers" :key="filteruser.id">
+          <div class="card shadow-sm">
+            <img :src="`static/images/${filteruser.image || 'default-user.jpg'}`" class="card-img-top" alt="User Image">
+            <div class="card-body">
+              <h5 class="card-title">{{ filteruser.name }} {{ filteruser.surname }}</h5>
+              <p class="card-text">Username: {{ filteruser.username }}</p>
+              <button 
+                class="mt-3"
+                @click="showUserDetails(filteruser.id)">
+                User's details
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    </div>
 
     <div v-if="currentView === 'user-auctions'" class="container mt-4">
-
       <div class="container mt-4">
         <h2 class="mb-4">Your Auctions</h2>
         <div class="row g-4 mb-3" v-if="selectedUserCreatedAuctions.length > 0">

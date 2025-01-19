@@ -63,8 +63,8 @@ export default {
     methods: {
         formatDate(dateString) {
             if (!dateString) return '';
-            const opt = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString(undefined, opt);
+            const date = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, date);
         },
         isAuctionClosed(status) {
             return status === 'closed' ? 'Auction Closed' : 'Auction Open';
