@@ -16,7 +16,7 @@ router.get('/', updateAuctionStatuses, async (req, res) => {
     }
 });
 
-router.post('/', verifyToken, upload.single('image'), updateAuctionStatuses, async (req, res) => {
+router.post('/', verifyToken, upload.single('image'),  async (req, res) => {
     const mysql = await db.connectToDatabase();
     const { title, description, start_price, end_date, icon } = req.body;
     const user_id = req.userId;
@@ -37,7 +37,7 @@ router.post('/', verifyToken, upload.single('image'), updateAuctionStatuses, asy
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', updateAuctionStatuses, async (req, res) => {
     const mysql = await db.connectToDatabase();    
     try {
         const [auctions] = await mysql.query("SELECT * FROM v_auction_details WHERE auction_id = ?", [parseInt(req.params.id)]);

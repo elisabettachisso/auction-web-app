@@ -1,71 +1,94 @@
-# Used Guitars and Broken Dreams
+# Riff Market
 
-An online auction application where users can buy and sell items like guitars, vinyl records, and other unique goods. The project includes authentication, auction management, and a modern interface.
-
-## Key Features
-
-- **Registration and Login**: Users can register and log in to the system.
-- **Auction Management**: Users can create, search, filter, and participate in auctions.
-- **Modern Interface**: Built with Bootstrap and Vue.js for a smooth and interactive user experience.
-- **Security**: Session management with JWT and route protection using middleware.
+This project implements a web application for managing an online auction system. Users can register, log in, view available auctions, place bids, and manage their data.
 
 ## Project Structure
 
-The project is divided into frontend and backend components:
-
-### Frontend
-- `index.html`: Landing page of the project.
-- `login.html` and `register.html`: Pages for user authentication.
-- `home.html`: Dashboard for exploring and managing auctions.
-- JavaScript files (`*.js`) for client-side logic powered by Vue.js.
+The project is divided into various parts, each with specific responsibilities:
 
 ### Backend
-- `users.routes.js`: User management.
-- `auth.routes.js`: Authentication and session handling.
-- `auctions.routes.js`: Auction CRUD operations.
-- Middleware for verifying JWT tokens (`auth.js`).
+
+#### `app.js`
+The main file of the backend application. Configures the Express server and registers the main routes.
+
+- Integration of middleware for handling HTTP requests.
+- Configuration of routes defined in separate files.
+
+#### Routes
+- **`users.routes.js`**: Manages user-related operations, such as registration and login.
+- **`auctions.routes.js`**: Manages operations related to auctions, such as creation, modification, and viewing.
+- **`bids.routes.js`**: Manages bids placed on auctions.
+- **`auth.routes.js`**: Provides authentication and authorization functionalities.
+
+#### `middlewares.js`
+Contains custom middleware for:
+- User authentication and authorization.
+- Multer Integration: Handles file uploads for auction images.
+- Auction Status Updates: Automatically updates auction statuses (open or closed) based on their end date.
+
+### Frontend
+
+#### HTML Files
+- **`index.html`**: Main page of the application.
+- **`login.html`**: Login page for users.
+- **`register.html`**: Registration page for new users.
+- **`home.html`**: Main page with an overview of available auctions, other users registrated to the applications and other data about each user's own auctions and bids.
+
+#### JS Files
+- **`home.js`**: Implements the core functionality of the front end using Vue.js. It manages the application state, user interactions, and API calls for fetching auctions, bids, and user data.- 
+- **`login.js`**: Manages the user login process.
+- **`register.js`**: Handles the registration of new users.
+- **`utils.js`**: Collects common functions for JWT token handling.
+
+##### Components:
+
+- **`Navbar.js`**: A Vue component for the navigation bar, dynamically displaying options based on the user's authentication status.
+- **`AuctionCard.js`**: A Vue component for representing an auction as an interactive visual card, with options to edit or delete auctions if the user has appropriate permissions.
+
+### Styling and Interactivity
+- **`style.css`**: Style is handled using CSS and Bootstrap for responsive design.
+- **`Vue.js`**: The project heavily utilizes Vue.js for building dynamic components and managing the state of the application.
+
+## Features
+
+### For Users
+1. **Registration**
+   - Users can register by providing a name, surname, usenrame, and password.
+2. **Login**
+   - Access via username and password.
+3. **View Auctions**
+   - Users can view available auctions.
+4. **View Auctions' Details**
+   - Users can view auctions' details.
+4. **View Other Users' Details**
+   - Users can view other users' details.
+5. **Place Bids**
+   - Authenticated users can place bids on specific auctions.
+6. **Manage Auctions**
+   - Authenticated users can create, edit, and delete their own auctions.
 
 ## Installation
 
-Follow these steps to set up the project locally:
-
-1. **Clone the repository**:
+1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
-
-
-2. **Install dependencies**:
-   - **Frontend**: Install required libraries (e.g., Vue.js and Bootstrap via CDN links in HTML files).
-   - **Backend**: Install Node.js dependencies.
-     ```bash
-     cd backend
-     npm install
-     ```
-
-3. **Set up environment variables**:
-   Create a `.env` file in the backend directory with the following content:
-   ```env
-   PORT=3000
-   JWT_SECRET=your-secret-key
-   DB_HOST=your-database-host
-   DB_USER=your-database-user
-   DB_PASSWORD=your-database-password
-   DB_NAME=your-database-name
+   git clone https://github.com/elisabettachisso/auction-web-app
    ```
 
-4. **Start the server**:
+2. **Build the Docker Container**
    ```bash
-   npm start
+   docker compose up --build
    ```
 
-5. **Access the application**:
-   Open your browser and navigate to `http://localhost:3000`.
+3. **Access the Frontend**
+   - Go to https://localhost:3000/
 
-## Usage
+## Requirements
 
-- **Explore Auctions**: Visit the home page and browse the available auctions.
-- **Authentication**: Register for an account or log in to participate in auctions.
-- **Create Auctions**: Authenticated users can create and manage their own auctions.
-- **Place Bids**: Place bids on items to compete with other users.
+- Docker
 
+## Technologies Used
+
+- **Backend**: Node.js, Express.js
+- **Frontend**: HTML, CSS, JavaScript, Vue.js
+- **Authentication**: JWT via cookies
+- **Database**: MySQL (via Docker Compose)

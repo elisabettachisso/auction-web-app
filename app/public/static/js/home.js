@@ -315,15 +315,13 @@ const app = Vue.createApp({
     },  
     async deleteAuction(auctionId) {
       const proceed = window.confirm('You are deleting this auction, are you sure you want to proceed?');
-          if (!proceed) {
-              return; 
-          }
+      if (!proceed) {
+          return; 
+      }
       try {
         const response = await fetch(`/api/auctions/${auctionId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
+          method: 'DELETE',                 
+          credentials: 'include'
         });
         if (response.ok) {
           await this.fetchAuctions();

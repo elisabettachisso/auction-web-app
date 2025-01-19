@@ -16,7 +16,7 @@
       <input type="text" v-model="username" placeholder="Username" required>
       <input type="password" v-model="password" placeholder="Password" required>
       <button type="submit">Login</button>
-      <p v-if="message" :class="{'message': true, 'success': success, 'fail': fail}">{{ message }}</p>
+      <p v-if="message" :class="{'message': true, 'text-success': success, 'text-fail': fail }">{{ message }}</p>
     </form>
     <div class="links">
       <a href="/home.html">Go to Auctions</a>

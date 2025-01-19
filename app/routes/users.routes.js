@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db.js');
-const { verifyToken } = require('../middlewares/middlewares.js');
+const { verifyToken, updateAuctionStatuses } = require('../middlewares/middlewares.js');
 
 router.get('/users/', async (req, res) => {
     const mysql = await db.connectToDatabase();
@@ -15,7 +15,7 @@ router.get('/users/', async (req, res) => {
     }
 });
 
-router.get('/users/:id', async (req, res) => {
+router.get('/users/:id', updateAuctionStatuses, async (req, res) => {
     const mysql = await db.connectToDatabase();
     try {
         const userId = parseInt(req.params.id);
